@@ -6,16 +6,18 @@ import yaml
 
 
 class Installer:
-    def __init__(self, workdir=f"{os.environ['HOME']}/topiaas/devenv"):
+    def __init__(self, workdir=f"{os.environ['HOME']}/topiaas"):
         self.WORKDIR = workdir
         self.HOST_WEBSITE_PATH = os.path.join(self.WORKDIR, "website")
-        self.CONTAINER_WORKDIR = "/opt/topiaas/devenv"
+        self.CONTAINER_WORKDIR = "/opt/topiaas"
         self.WEBSITE_URL = "https://github.com/MohamedKasem99/flask-base.git"
         self.CONTAINER_NAME = "topiaas_devenv"
         self.CONTAINER_IMAGE = "mohamedkasem99/topiaas_devenv"
         self.container_created = False
         if not os.path.exists(self.WORKDIR):
             os.makedirs(self.WORKDIR)
+        with open("configs.yaml") as fd:
+            self.CONFIG = yaml.safe_load(fd)
 
     def run_cmd(self, cmd, shell=True):
         try:
@@ -28,7 +30,7 @@ class Installer:
 
     def is_container_created(self):
         try:
-            subprocess.check_output("docker ps | grep topiaas_devenv", shell=True)
+            subprocess.check_output("docker ps -a | grep topiaas_devenv", shell=True)
             return True
         except subprocess.CalledProcessError:
             return False
@@ -44,8 +46,8 @@ class Installer:
                 raise
             return False
 
-    def clone_website_repo(self, overwrite=True):
-        print("cloning website repo ...")
+    def clone_website_repo(self):
+        overwrite = self.CONFIG["repositories"]["website"]["overwrite"]
         if os.path.exists(self.HOST_WEBSITE_PATH):
             if overwrite:
                 print(
@@ -53,8 +55,10 @@ class Installer:
                     file=sys.stderr,
                 )
                 shutil.rmtree(self.HOST_WEBSITE_PATH)
+                print("cloning website repo ...")
                 self.run_cmd(f"git clone {self.WEBSITE_URL} {self.HOST_WEBSITE_PATH}")
         else:
+            print("cloning website repo ...")
             self.run_cmd(f"git clone {self.WEBSITE_URL} {self.HOST_WEBSITE_PATH}")
 
     def create_container(self):
@@ -80,22 +84,28 @@ class Installer:
     def install_py_requirements(self):
         print("Installing devenv requirements.txt ...")
         self.run_container_cmd(
-            f"pip3 install -r {self.CONTAINER_WORKDIR + '/requirements.txt'}"
+            f"pip3 install -r {self.CONTAINER_WORKDIR + '/devenv/requirements.txt'}"
         )
         print("Installing website requirements.txt ...")
         self.run_container_cmd(
             f"pip3 install -r {self.CONTAINER_WORKDIR + '/website/requirements.txt'}"
         )
 
-    def install(self, overwrite):
-        self.clone_website_repo(overwrite)
+    def install(self):
+        self.clone_website_repo()
         self.run_cmd("minikube start")
-        if not self.is_container_created():
+        if self.is_container_created():
+            if self.CONFIG["containers"]["devcontainer"]["recreate"]:
+                self.run_cmd("docker stop topiaas_devenv")
+                self.run_cmd("docker rm topiaas_devenv")
+                self.create_container()
+        else:
             self.create_container()
+
         self.configure_container()
         self.install_py_requirements()
 
 
 if __name__ == "__main__":
     installer = Installer()
-    installer.install(False)
+    installer.install()
