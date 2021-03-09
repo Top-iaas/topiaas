@@ -93,7 +93,7 @@ class Installer:
 
     def install(self):
         self.clone_website_repo()
-        self.run_cmd("minikube start")
+        self.run_cmd("minikube start --driver=docker")
         if self.is_container_created():
             if self.CONFIG["containers"]["devcontainer"]["recreate"]:
                 self.run_cmd("docker stop topiaas_devenv")
