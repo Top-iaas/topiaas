@@ -80,6 +80,10 @@ class Installer:
             fd.write(new_kubeconfig)
         self.run_cmd("docker cp /tmp/kubeconfig topiaas_devenv:/root/.kube/config")
         self.run_cmd("docker cp ~/.minikube topiaas_devenv:/root/.minikube")
+        
+    def install_minikube(self):
+        self.run_cmd("wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -O ~/.local/bin/minikube")
+        self.run_cmd("chmod 755 ~/.local/bin/minikube")
 
     def install_py_requirements(self):
         print("Installing devenv requirements.txt ...")
@@ -93,7 +97,8 @@ class Installer:
 
     def install(self):
         self.clone_website_repo()
-        self.run_cmd("minikube start")
+        self.install_minikube()
+        self.run_cmd("minikube start --driver=docker")
         if self.is_container_created():
             if self.CONFIG["containers"]["devcontainer"]["recreate"]:
                 self.run_cmd("docker stop topiaas_devenv")
@@ -101,7 +106,7 @@ class Installer:
                 self.create_container()
         else:
             self.create_container()
-
+        
         self.configure_container()
         self.install_py_requirements()
 
