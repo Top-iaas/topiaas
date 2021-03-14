@@ -60,3 +60,4 @@ wcwidth==0.1.8
 webassets==0.12.1
 Werkzeug==0.15.5
 WTForms==2.2.1
+flake8

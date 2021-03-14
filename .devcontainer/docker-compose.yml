@@ -1,0 +1,10 @@
+version: "3.3"
+services:
+  topiaas_devenv:
+    container_name: topiaas_devenv_1
+    network_mode: host
+    tmpfs: "/tmp,/run,/run/lock"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      - "~/topiaas/devenv/:/opt/topiaas/devenv"
+    image: topiaas_devenv
