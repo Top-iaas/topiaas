@@ -1,0 +1,20 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.163.1/containers/ubuntu
+{
+	"build": {
+		"dockerfile": "Dockerfile",
+	},
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [],
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [
+		80,
+		5000
+	],
+	// "postCreateCommand": "pip3 install -r devenv/requirements.txt && pip3 install -r website/requirements.txt",
+	// "remoteUser": "root"
+}
