@@ -15,6 +15,6 @@
 		80,
 		5000
 	],
-	// "postCreateCommand": "pip3 install -r devenv/requirements.txt && pip3 install -r website/requirements.txt",
+	"postCreateCommand": "redis-server --daemonize yes",
 	// "remoteUser": "root"
 }
