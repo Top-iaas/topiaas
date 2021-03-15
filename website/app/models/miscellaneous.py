@@ -9,7 +9,7 @@ class EditableHTML(db.Document):
     @staticmethod
     def get_editable_html(editor_name):
         editable_html_obj = (
-            EditableHTML.objects().filter_by(editor_name=editor_name).first()
+            EditableHTML.objects().filter(editor_name=editor_name).first()
         )
 
         if editable_html_obj is None:
