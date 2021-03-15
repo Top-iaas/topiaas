@@ -74,9 +74,8 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DEV_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL',
+        'mongodb://localhost:27017')
 
     @classmethod
     def init_app(cls, app):
@@ -88,9 +87,8 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "TEST_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-test.sqlite")
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL',
+        'mongodb://localhost:27017')
     WTF_CSRF_ENABLED = False
 
     @classmethod
@@ -104,10 +102,9 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     USE_RELOADER = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data.sqlite")
-    )
-    SSL_DISABLE = os.environ.get("SSL_DISABLE", "True") == "True"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
+        'mongodb://localhost:27017')
+    SSL_DISABLE = (os.environ.get('SSL_DISABLE', 'True') == 'True')
 
     @classmethod
     def init_app(cls, app):

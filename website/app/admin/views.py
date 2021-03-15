@@ -46,8 +46,7 @@ def new_user():
             email=form.email.data,
             password=form.password.data,
         )
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash("User {} successfully created".format(user.full_name()), "form-success")
     return render_template("admin/new_user.html", form=form)
 
@@ -65,8 +64,7 @@ def invite_user():
             last_name=form.last_name.data,
             email=form.email.data,
         )
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         token = user.generate_confirmation_token()
         invite_link = url_for(
             "account.join_from_invite", user_id=user.id, token=token, _external=True
@@ -88,8 +86,8 @@ def invite_user():
 @admin_required
 def registered_users():
     """View all registered users."""
-    users = User.query.all()
-    roles = Role.query.all()
+    users = User.list()
+    roles = Role.list()
     return render_template("admin/registered_users.html", users=users, roles=roles)
 
 
@@ -99,7 +97,7 @@ def registered_users():
 @admin_required
 def user_info(user_id):
     """View a user's profile."""
-    user = User.query.filter_by(id=user_id).first()
+    user = User.list(id=user_id).first()
     if user is None:
         abort(404)
     return render_template("admin/manage_user.html", user=user)
@@ -110,14 +108,13 @@ def user_info(user_id):
 @admin_required
 def change_user_email(user_id):
     """Change a user's email."""
-    user = User.query.filter_by(id=user_id).first()
+    user = User.list(id=user_id).first()
     if user is None:
         abort(404)
     form = ChangeUserEmailForm()
     if form.validate_on_submit():
         user.email = form.email.data
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash(
             "Email for user {} successfully changed to {}.".format(
                 user.full_name(), user.email
@@ -146,8 +143,7 @@ def change_account_type(user_id):
     form = ChangeAccountTypeForm()
     if form.validate_on_submit():
         user.role = form.role.data
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash(
             "Role for user {} successfully changed to {}.".format(
                 user.full_name(), user.role.name
@@ -162,7 +158,7 @@ def change_account_type(user_id):
 @admin_required
 def delete_user_request(user_id):
     """Request deletion of a user's account."""
-    user = User.query.filter_by(id=user_id).first()
+    user = User.list(id=user_id).first()
     if user is None:
         abort(404)
     return render_template("admin/manage_user.html", user=user)
@@ -180,9 +176,8 @@ def delete_user(user_id):
             "error",
         )
     else:
-        user = User.query.filter_by(id=user_id).first()
-        db.session.delete(user)
-        db.session.commit()
+        user = User.list(id=user_id).first()
+        user.save()
         flash("Successfully deleted user %s." % user.full_name(), "success")
     return redirect(url_for("admin.registered_users"))
 
@@ -196,12 +191,11 @@ def update_editor_contents():
     edit_data = request.form.get("edit_data")
     editor_name = request.form.get("editor_name")
 
-    editor_contents = EditableHTML.query.filter_by(editor_name=editor_name).first()
+    editor_contents = EditableHTML.list(editor_name=editor_name).first()
     if editor_contents is None:
         editor_contents = EditableHTML(editor_name=editor_name)
     editor_contents.value = edit_data
 
-    db.session.add(editor_contents)
-    db.session.commit()
+    editor_contents.save()
 
     return "OK", 200

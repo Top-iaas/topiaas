@@ -3,7 +3,6 @@ from flask_login import AnonymousUserMixin, UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from .. import db, login_manager
 
 
@@ -12,70 +11,84 @@ class Permission:
     ADMINISTER = 0xFF
 
 
-class Role(db.Model):
-    __tablename__ = "roles"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    index = db.Column(db.String(64))
-    default = db.Column(db.Boolean, default=False, index=True)
-    permissions = db.Column(db.Integer)
-    users = db.relationship("User", backref="role", lazy="dynamic")
+class Role(db.Document):
+    name = db.StringField(primary_key=True)
+    index = db.StringField()
+    default = db.BooleanField(default=False, index=True)
+    permissions = db.IntField()
+    users = db.ListField(db.ObjectIdField, default=[])
 
-    @staticmethod
-    def insert_roles():
+    @classmethod
+    def insert_roles(cls):
         roles = {
             "User": (Permission.GENERAL, "main", True),
             "Administrator": (
-                Permission.ADMINISTER,
+                Permission.ADMINISTER,  # grants all permissions
                 "admin",
-                False,  # grants all permissions
+                False,
             ),
         }
         for r in roles:
-            role = Role.query.filter_by(name=r).first()
+            role = cls.objects(name=r).first()
             if role is None:
                 role = Role(name=r)
             role.permissions = roles[r][0]
             role.index = roles[r][1]
             role.default = roles[r][2]
-            db.session.add(role)
-        db.session.commit()
+            role.save()
+
+    @classmethod
+    def list(cls, **filter_kwargs) -> db.QuerySet:
+        return cls.objects().filter(**filter_kwargs)
+
+    @classmethod
+    def get_by_name(cls, name) -> "Role":
+        return cls.objects(name=name).first_or_404()
 
     def __repr__(self):
         return "<Role '%s'>" % self.name
 
 
-class User(UserMixin, db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    confirmed = db.Column(db.Boolean, default=False)
-    first_name = db.Column(db.String(64), index=True)
-    last_name = db.Column(db.String(64), index=True)
-    email = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+class User(UserMixin, db.Document):
+    confirmed = db.BooleanField(default=False)
+    first_name = db.StringField(required=True)
+    last_name = db.StringField(required=True)
+    email = db.StringField(primary_key=True, required=True)
+    password_hash = db.StringField(required=True)
+    role_id = db.StringField()
 
     def __init__(self, **kwargs):
+        password = kwargs.pop("password", None)
         super(User, self).__init__(**kwargs)
-        if self.role is None:
+        if self.role_id is None:
             if self.email == current_app.config["ADMIN_EMAIL"]:
-                self.role = Role.query.filter_by(
-                    permissions=Permission.ADMINISTER
-                ).first()
-            if self.role is None:
-                self.role = Role.query.filter_by(default=True).first()
+                admin_role = Role.list(permissions=Permission.ADMINISTER).first()
+                if admin_role:
+                    self.role_id = admin_role.name
+            if self.role_id is None:
+                self.role_id = Role.list(default=True).first().name
+        if password:
+            self.password = password
 
     def full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
 
     def can(self, permissions):
         return (
-            self.role is not None
-            and (self.role.permissions & permissions) == permissions
+            self.role_id is not None
+            and (Role.get_by_name(self.role_id).permissions & permissions)
+            == permissions
         )
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER)
+
+    def get_id(self):
+        return self.email
+
+    @property
+    def role(self):
+        return Role.get_by_name(self.role_id)
 
     @property
     def password(self):
@@ -116,8 +129,7 @@ class User(UserMixin, db.Model):
         if data.get("confirm") != self.id:
             return False
         self.confirmed = True
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     def change_email(self, token):
@@ -132,11 +144,10 @@ class User(UserMixin, db.Model):
         new_email = data.get("new_email")
         if new_email is None:
             return False
-        if self.query.filter_by(email=new_email).first() is not None:
+        if self.list(email=new_email).first() is not None:
             return False
         self.email = new_email
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     def reset_password(self, token, new_password):
@@ -149,19 +160,17 @@ class User(UserMixin, db.Model):
         if data.get("reset") != self.id:
             return False
         self.password = new_password
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     @staticmethod
     def generate_fake(count=100, **kwargs):
         """Generate a number of fake users for testing."""
-        from sqlalchemy.exc import IntegrityError
         from random import seed, choice
         from faker import Faker
 
         fake = Faker()
-        roles = Role.query.all()
+        roles = Role.objects().all()
 
         seed()
         for i in range(count):
@@ -171,17 +180,17 @@ class User(UserMixin, db.Model):
                 email=fake.email(),
                 password="password",
                 confirmed=True,
-                role=choice(roles),
+                role_id=choice(roles).name,
                 **kwargs
             )
-            db.session.add(u)
-            try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
+            u.save()
 
     def __repr__(self):
         return "<User '%s'>" % self.full_name()
+
+    @classmethod
+    def list(cls, **filter_kwargs) -> list:
+        return cls.objects().filter(**filter_kwargs)
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -197,4 +206,4 @@ login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.objects(email=user_id).first()
