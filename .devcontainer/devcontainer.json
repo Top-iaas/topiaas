@@ -13,8 +13,7 @@
 		"ms-python.python",
 		"ms-python.vscode-pylance", // Code language server 
 		"njpwerner.autodocstring", // Auto docstring
-		"streetsidesoftware.code-spell-checker", // Spellchecker
-		"ms-pyright.pyright" // Static type checker
+		"streetsidesoftware.code-spell-checker" // Spellchecker
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
