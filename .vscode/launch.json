@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "manage",
-            "cwd": "${workspaceFolder}/website",
+            "cwd": "${workspaceFolder}/topiaas",
             "args": [
                 "runserver"
             ]
