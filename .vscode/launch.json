@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "manage",
-            "cwd": "${workspaceFolder}/topiaas",
+            "cwd": "${workspaceFolder}/portal",
             "args": [
                 "runserver"
             ]
