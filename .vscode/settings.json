@@ -3,4 +3,6 @@
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "editor.formatOnSave": true,
+    "python.pythonPath": "/usr/bin/python3",
+    "python.formatting.provider": "black",
 }
