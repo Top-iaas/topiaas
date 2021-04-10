@@ -13,4 +13,5 @@ dist
 *.sqlite
 .idea
 dump.rdb
+db.mongo
 .vscode/
