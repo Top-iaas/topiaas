@@ -1,26 +1,25 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.163.1/containers/ubuntu
 {
-	"build": {
-		"dockerfile": "Dockerfile",
-	},
-	// Set *default* container specific settings.json values on container create.
+	"name": "Topiaas",
+	"dockerComposeFile": "docker-compose.yml",
+	"workspaceFolder": "/workspace",
+	"service": "topiaas-app",
+	"runServices": [
+		"topiaas-mongodb"
+	],
 	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/zsh"
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
 		"ms-python.vscode-pylance", // Code language server 
 		"njpwerner.autodocstring", // Auto docstring
-		"streetsidesoftware.code-spell-checker", // Spellchecker
-		"ms-pyright.pyright" // Static type checker
+		"ms-azuretools.vscode-docker",
+		"streetsidesoftware.code-spell-checker" // Spellchecker
 	],
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [
-		80,
-		5000
-	],
-	"postCreateCommand": "redis-server --daemonize yes && ./website/init_database.sh",
-	// "remoteUser": "root"
+	"shutdownAction": "stopCompose",
+	"postCreateCommand": "cd website && ./website/init_database.sh",
+	"remoteUser": "vscode"
 }
