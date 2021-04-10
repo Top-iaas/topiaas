@@ -1,10 +1,37 @@
-version: "3.3"
+version: "3.7"
 services:
-  topiaas_devenv:
+  topiaas-app:
+    build:
+      context: "."
+      dockerfile: Dockerfile
     container_name: topiaas_devenv_1
-    network_mode: host
-    tmpfs: "/tmp,/run,/run/lock"
+    environment: 
+      SECRET_KEY: sercet_key
+    volumes: 
+      - ..:/workspace:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    networks:
+      - topiaas-net
+
+  topiaas-mongodb:
+    image: bitnami/mongodb:latest
+    container_name: topiaas_mongodb
+    ports:
+      - 27017:27017
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-      - "~/topiaas/devenv/:/opt/topiaas/devenv"
-    image: topiaas_devenv
+      - mongodb_data:/mongodb
+
+    restart: unless-stopped
+    networks:
+      - topiaas-net
+
+
+volumes:
+  mongodb_data:
+    driver: local
+
+    
+networks:
+  topiaas-net:
+    driver: bridge
