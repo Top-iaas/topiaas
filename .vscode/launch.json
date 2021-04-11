@@ -5,13 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Webserver",
+            "name": "Portal",
             "type": "python",
             "request": "launch",
             "module": "manage",
             "cwd": "${workspaceFolder}/portal",
             "args": [
                 "runserver"
+            ]
+        },
+        {
+            "name": "Worker",
+            "type": "python",
+            "request": "launch",
+            "module": "manage",
+            "cwd": "${workspaceFolder}/portal",
+            "args": [
+                "run_worker"
             ]
         }
     ]

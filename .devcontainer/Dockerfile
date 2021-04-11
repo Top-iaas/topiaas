@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:3
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y vim ipython3 python3-pip git openssh-server openssh-client net-tools wget curl build-essential libpq-dev
-ADD requirements.txt /opt/topiaas/requirements.txt
+ADD portal/requirements.txt /opt/topiaas/requirements.txt
 RUN pip3 install flake8==3.9.0 black==20.8b1
 RUN pip3 install -r /opt/topiaas/requirements.txt
 # install kubectl
