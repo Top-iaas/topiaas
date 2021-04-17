@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orangeml-deployment
+  labels:
+    app: orangeml
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: orangeml
+  template:
+    metadata:
+      labels:
+        app: orangeml
+    spec:
+      containers:
+      - name: orangeml
+        image: orangeml
+        ports:
+        - containerPort: 80
