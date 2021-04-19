@@ -6,7 +6,8 @@
 	"workspaceFolder": "/workspace",
 	"service": "topiaas-app",
 	"runServices": [
-		"topiaas-mongodb"
+		"postgres",
+		"redis"
 	],
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/zsh"
@@ -20,6 +21,5 @@
 		"streetsidesoftware.code-spell-checker" // Spellchecker
 	],
 	"shutdownAction": "stopCompose",
-	"postCreateCommand": "cd website && ./website/init_database.sh",
 	"remoteUser": "vscode"
 }

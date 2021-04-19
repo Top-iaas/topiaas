@@ -2,36 +2,39 @@ version: "3.7"
 services:
   topiaas-app:
     build:
-      context: "."
-      dockerfile: Dockerfile
+      context: ".."
+      dockerfile: .devcontainer/Dockerfile
     container_name: topiaas_devenv_1
-    environment: 
+    environment:
       SECRET_KEY: sercet_key
-    volumes: 
+    volumes:
       - ..:/workspace:cached
     # Overrides default command so things don't shut down after the process ends.
     command: /bin/sh -c "while sleep 1000; do :; done"
     networks:
       - topiaas-net
 
-  topiaas-mongodb:
-    image: bitnami/mongodb:latest
-    container_name: topiaas_mongodb
-    ports:
-      - 27017:27017
+  postgres:
+    image: postgres:9.6.21
+    environment:
+      POSTGRES_USER: devel
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: db
+    networks:
+      - topiaas-net
     volumes:
-      - mongodb_data:/mongodb
-
+      - db-data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  redis:
+    image: redis:6.2.1-alpine
     networks:
       - topiaas-net
 
-
 volumes:
-  mongodb_data:
+  db-data:
     driver: local
 
-    
 networks:
   topiaas-net:
     driver: bridge
