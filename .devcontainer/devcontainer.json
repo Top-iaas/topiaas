@@ -6,6 +6,7 @@
 	"workspaceFolder": "/workspace",
 	"service": "topiaas-app",
 	"runServices": [
+		"orangeml",
 		"postgres",
 		"redis"
 	],
