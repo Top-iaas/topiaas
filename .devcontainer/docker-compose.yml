@@ -14,6 +14,16 @@ services:
     networks:
       - topiaas-net
 
+  orangeml:
+    build:
+      context: ".."
+      dockerfile: engine/orangeml/Dockerfile.orange
+    container_name: orangeml
+    volumes:
+      - ..:/workspace:cached
+    networks:
+      - topiaas-net
+
   postgres:
     image: postgres:9.6.21
     environment:
