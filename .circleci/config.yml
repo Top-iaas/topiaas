@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-portal:
     docker:
-      - image: docker:20.10.6-git
+      - image: docker:dind
       
     steps:
       - checkout
