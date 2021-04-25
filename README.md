@@ -1,4 +1,4 @@
-[![Top-iaas](https://circleci.com/gh/Top-iaas/topiaas.svg?style=svg)](https://app.circleci.com/pipelines/github/Top-iaas/topiaas?branch=circleci-project-setup)
+[![Top-iaas](https://circleci.com/gh/Top-iaas/topiaas/tree/circleci-project-setup.svg?style=svg)](https://app.circleci.com/pipelines/github/Top-iaas/topiaas?branch=circleci-project-setup)
 
 # topiaas
 ## Architecture
