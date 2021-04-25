@@ -18,4 +18,5 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-portal
+      - build-portal:
+          context: DockerPass
