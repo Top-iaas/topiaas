@@ -3,13 +3,10 @@ version: 2.1
 jobs:
   build-portal:
     docker:
-      - image: circleci/golang:1.15
+      - image: docker:20.10.6-git
       
     steps:
       - checkout
-
-      - setup_remote_docker:
-          version: 19.03.13
 
       - run: |
           if [[ $(git branch --show-current) == "master" ]]; then
