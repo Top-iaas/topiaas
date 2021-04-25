@@ -19,7 +19,7 @@ jobs:
           fi
           docker build -t topiaas/portal:$TAG ./portal
           docker build -t topiaas/portalworker:$TAG -f ./portal/Dockerfile.worker ./portal
-          echo $DockerPass | docker login -u $DockerUserName --password-stdin
+          docker login -u $DockerUserName -p $DockerPass
           docker push topiaas/portal:$TAG
           docker push topiaas/portalworker:$TAG
 
