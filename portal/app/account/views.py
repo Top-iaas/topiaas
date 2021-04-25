@@ -23,9 +23,11 @@ from app.account.forms import (
     RegistrationForm,
     RequestResetPasswordForm,
     ResetPasswordForm,
+    ChangeCapacityLimits,
 )
 from app.email import send_email
 from app.models import User
+from app.business import account as account_buzz
 
 account = Blueprint("account", __name__)
 
@@ -59,6 +61,8 @@ def register():
             last_name=form.last_name.data,
             email=form.email.data,
             password=form.password.data,
+            vcpu_limit=form.vcpu_limit.data,
+            memory_limit=form.memory_limit.data,
         )
         db.session.add(user)
         db.session.commit()
@@ -186,6 +190,20 @@ def change_email_request():
             return redirect(url_for("main.index"))
         else:
             flash("Invalid email or password.", "form-error")
+    return render_template("account/manage.html", form=form)
+
+
+@account.route("/manage/change-capacity-limits", methods=["GET", "POST"])
+@login_required
+def change_capacity_limits():
+    """Change an existing user's capacity limits."""
+    form = ChangeCapacityLimits()
+    if form.validate_on_submit():
+        account_buzz.change_limits(
+            current_user.id, form.vcpu_limit.data, form.memory_limit.data
+        )
+        flash("Capacity limits have been set successfully", "form-success")
+        return redirect(url_for("main.index"))
     return render_template("account/manage.html", form=form)
 
 
