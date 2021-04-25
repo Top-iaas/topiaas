@@ -12,7 +12,7 @@ jobs:
           version: 19.03.13
           
       - run: |
-          if [[ $(git branch --show-current) == "master" ]]; then
+          if [[ $(git rev-parse --abbrev-ref HEAD) == "master" ]]; then
               TAG="latest"
           else
               TAG=$(echo $CIRCLE_SHA1 | cut -c -7)
