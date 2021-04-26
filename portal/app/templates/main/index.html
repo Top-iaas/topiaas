@@ -4,20 +4,26 @@
 {% block content %}
 {% if (current_user.is_authenticated) %} <h1>Hello {{ current_user.full_name() }} </h1>{% endif %},
 
+
 <header class=jumbotron>
   <div class=container>
     <div class="row row-header">
       <div class="col-12 col-sm-6">
-        <h1>Topias</h1>
-        <p>Ultimate tool that uses state-of-the-art AutoML models to find business value from tabular data. * INSERT
-          LOADS OF TALK HERE* </p>
+        <h1>TOPIAAS</h1>
+        <p>Meet your work demands on the go!
+        <ul>Access to any application through the browser.</ul>
+        <ul>Could be used by individuals or organizations with 10+ clients.</ul>
+        <ul>Scalable storage capacity.</ul>
+        <ul>Fast interactive UI.</ul>
+        <ul>Charging according to storage and time used for fair cost calculation.</ul>
+        </p>
       </div>
       <div class="col-12 col-sm-6 align-self-center">
         <img src="/static/images/laptop.png" class="img-fluid">
       </div>
       <div class="col-12 col-sm-3 align-self-center">
-        <a data-toggle="modal" data-target="#learnMoreModal"><button type="button"
-            class="btn btn-warning btn-block">Learn more</button></a>
+        <a href='/demo'><button type="button" class="btn btn-warning btn-block button trynow-button">Try
+            now</button></a>
       </div>
 
     </div>
@@ -69,7 +75,7 @@
     </div>
   </div>
 </div>
-<div class="container">
+<!-- <div class="container">
   <div class="canvas-container">
     <div class="row row-header">
       <div class="col-12 col-sm-6">
@@ -77,23 +83,26 @@
         </canvas>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>
 
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- <script type="module">
 
   // RFB holds the API to connect and communicate with a VNC server
   // NEED TO FIX IMPORT. GET URL SINCE WE DONT HAVE LIBRARY HERE
-  import RFB from './core/rfb.js';
+  import RFB from "./static/node_modules/@novnc/novnc/core/rfb.js";
 
   window.onload = function () { connectVNC() };
 
   function connectVNC() {
+
     // hardcode values for now
     var
-      DEFAULT_HOST = '172.21.0.3',
+      DEFAULT_HOST = '172.18.0.4',
       DEFAULT_PORT = '80',
       DEFAULT_PASSWORD = "password1",
       DEFAULT_PATH = "websockify"
@@ -106,23 +115,10 @@
       sPassword = DEFAULT_PASSWORD,
       sPath = DEFAULT_PATH
       ;
-
-    cRfb = new RFB({
-      "target": oTarget, // aims
-      "focusContainer": top.document // mouse focus positioning
-      // "view_only": WebUtil.getConfigVar("view_only", false)
-    });
-
+    cRfb = new RFB(oTarget, "ws://172.18.0.4:80");
     cRfb.connect(sHost, nPort, sPassword, sPath);
-
+    debugger;
 
   };
-</script>
-
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</script> -->
 {% endblock %}
