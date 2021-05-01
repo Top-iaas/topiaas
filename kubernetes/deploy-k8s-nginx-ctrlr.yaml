@@ -37,6 +37,7 @@ metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
 data:
+  ssl-redirect: "true"
 ---
 # Source: ingress-nginx/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -335,6 +336,7 @@ spec:
             - --validating-webhook=:8443
             - --validating-webhook-certificate=/usr/local/certificates/cert
             - --validating-webhook-key=/usr/local/certificates/key
+            - --default-ssl-certificate=default/topiaas-ml-tls
           securityContext:
             capabilities:
               drop:
