@@ -75,50 +75,10 @@
     </div>
   </div>
 </div>
-<!-- <div class="container">
-  <div class="canvas-container">
-    <div class="row row-header">
-      <div class="col-12 col-sm-6">
-        <canvas id="noVNC_canvas" width="1080" height="640" style="border:1px solid #000000;">
-        </canvas>
-      </div>
-    </div>
-  </div> -->
 </div>
 
 
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
   integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<!-- <script type="module">
-
-  // RFB holds the API to connect and communicate with a VNC server
-  // NEED TO FIX IMPORT. GET URL SINCE WE DONT HAVE LIBRARY HERE
-  import RFB from "./static/node_modules/@novnc/novnc/core/rfb.js";
-
-  window.onload = function () { connectVNC() };
-
-  function connectVNC() {
-
-    // hardcode values for now
-    var
-      DEFAULT_HOST = '172.18.0.4',
-      DEFAULT_PORT = '80',
-      DEFAULT_PASSWORD = "password1",
-      DEFAULT_PATH = "websockify"
-      ;
-    var cRfb = null;
-    var oTarget = document.getElementById("noVNC_canvas");
-
-    var sHost = DEFAULT_HOST,
-      nPort = DEFAULT_PORT,
-      sPassword = DEFAULT_PASSWORD,
-      sPath = DEFAULT_PATH
-      ;
-    cRfb = new RFB(oTarget, "ws://172.18.0.4:80");
-    cRfb.connect(sHost, nPort, sPassword, sPath);
-    debugger;
-
-  };
-</script> -->
 {% endblock %}
