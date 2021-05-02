@@ -1,0 +1,12 @@
+# Deploy with helm install my-release bitnami/postgresql-ha -f kubernetes/postgresql/values.yaml 
+postgresql:
+  username: devel
+  password: 12345
+  database: db
+  replicaCount: 3
+volumePermissions:
+  enabled: true
+persistence:
+  size: 2Gi
+  storageClass: manual
+clusterDomain: cluster.topiaas
