@@ -26,4 +26,5 @@ spec:
           - name: FLASK_CONFIG
             value: production
           - name: DATABASE_URL
+            # TODO: Use CI Secrets for username and password
             value: postgres://devel:12345@my-release-postgresql-ha-postgresql:5432/db

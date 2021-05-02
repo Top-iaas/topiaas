@@ -1,5 +1,6 @@
 # Deploy with helm install my-release bitnami/postgresql-ha -f kubernetes/postgresql/values.yaml 
 postgresql:
+  # TODO: Use CI Secrets for username and password
   username: devel
   password: 12345
   database: db
