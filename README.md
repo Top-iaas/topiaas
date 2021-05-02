@@ -1,4 +1,4 @@
-[![Top-iaas](https://circleci.com/gh/Top-iaas/topiaas.svg?style=svg)](https://app.circleci.com/pipelines/github/Top-iaas/topiaas?branch=master)
+[![Build and push orangeml image](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishOrangeML.yml/badge.svg)](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishOrangeML.yml)
 
 # topiaas
 ## Architecture
