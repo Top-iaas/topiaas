@@ -2,7 +2,7 @@ name: Build and push orangeml image
 
 on:
   push:
-    paths: -"engine/orangeml/*"
+    paths: -"engine/orangeml/**"
 
 jobs:
   build:
