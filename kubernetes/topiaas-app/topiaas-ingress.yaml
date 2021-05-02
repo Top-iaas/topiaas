@@ -1,0 +1,32 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: topiaas-ingress
+spec:
+  rules:
+    - host: "wwww.topiaas.ml"
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: topiaas-service
+              port:
+                number: 8080
+    - host: "topiaas.ml"
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: topiaas-service
+              port:
+                number: 8080
+  tls:
+    - hosts:
+      -  "wwww.topiaas.ml"
+      -  "topiaas.ml"
+      secretName: topiaas-ml-tls # TODO: change from being hardcoded

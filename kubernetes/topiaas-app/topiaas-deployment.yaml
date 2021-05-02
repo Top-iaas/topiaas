@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topiaas-deployment
+  labels:
+    app: topiaas
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: topiaas
+  template:
+    metadata:
+      labels:
+        app: topiaas
+    spec:
+      containers:
+      - name: topiaas
+        image: topiaas/portal:94d07b9 #TODO tag Should be set dynamically
+        ports:
+        - containerPort: 5000
+        env:
+          - name: SECRET_KEY
+            value: sercet_key #TODO: change
+          - name: FLASK_CONFIG
+            value: production
+          - name: DATABASE_URL
+            value: postgres://devel:12345@my-release-postgresql-ha-postgresql:5432/db
