@@ -75,7 +75,7 @@
 
     <script type="module" crossorigin="anonymous">
         // RFB holds the API to connect and communicate with a VNC server
-        import RFB from "./static/node_modules/@novnc/novnc/core/rfb.js";
+        import RFB from "https://cdn.jsdelivr.net/npm/@novnc/novnc@1.2.0/core/rfb.js";
 
         let rfb;
         let desktopName;
@@ -164,7 +164,7 @@
         } else {
             url = 'ws';
         }
-        url += '://' + '172.18.0.4';
+        url += '://' + '172.18.0.3';
         if (port) {
             url += ':' + '80';
         }
