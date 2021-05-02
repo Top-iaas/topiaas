@@ -22,4 +22,4 @@ jobs:
           file: engine/orangeml/Dockerfile.orange
           context: engine/orangeml/
           push: true
-          tags: topiaas/orangeml:${{ GITHUB_SHA }}
+          tags: topiaas/orangeml:${{ github.sha }}
