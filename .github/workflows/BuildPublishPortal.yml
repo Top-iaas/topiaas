@@ -1,0 +1,33 @@
+name: Build and push orangeml image
+
+on:
+  push:
+    paths: -"portal/*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push portal
+        uses: docker/build-push-action@v2
+        with:
+          context: portal/Dockerfile
+          push: true
+          tags: topiaas/portal:$(git rev-parse --short "$GITHUB_SHA")
+      - name: Build and push portal worker
+        uses: docker/build-push-action@v2
+        with:
+          context: portal/Dockerfile.worker
+          push: true
+          tags: topiaas/portalworker:$(git rev-parse --short "$GITHUB_SHA")
