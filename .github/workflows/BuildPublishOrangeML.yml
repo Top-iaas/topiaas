@@ -25,4 +25,4 @@ jobs:
         with:
           context: engine/orangeml/Dockerfile.orange
           push: true
-          tags: topiaas/orangeml:$(git rev-parse --short "$GITHUB_SHA")
+          tags: topiaas/orangeml:${{ git rev-parse --short "$GITHUB_SHA" }}
