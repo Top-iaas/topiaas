@@ -1,3 +1,5 @@
+[![Build and push orangeml image](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishOrangeML.yml/badge.svg)](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishOrangeML.yml)
+[![Build and push portal image](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishPortal.yml/badge.svg)](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishPortal.yml)
 # topiaas
 ## Architecture
 
