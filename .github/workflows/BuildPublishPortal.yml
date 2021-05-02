@@ -2,7 +2,7 @@ name: Build and push portal image
 
 on:
   push:
-    paths: -"portal/*"
+    paths: -"portal/**"
 
 jobs:
   build:
