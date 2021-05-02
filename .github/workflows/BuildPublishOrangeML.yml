@@ -3,6 +3,7 @@ name: Build and push orangeml image
 on:
   push:
     paths: -"engine/orangeml/**"
+  workflow_dispatch:
 
 jobs:
   build:
