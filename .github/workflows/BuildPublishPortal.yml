@@ -28,13 +28,15 @@ jobs:
       - name: Build and push portal
         uses: docker/build-push-action@v2
         with:
-          context: portal/Dockerfile
+          file: portal/Dockerfile
+          context: portal/
           push: true
           tags: topiaas/portal:${{ steps.vars.outputs.sha_short }}
           
       - name: Build and push portal worker
         uses: docker/build-push-action@v2
         with:
-          context: portal/Dockerfile.worker
+          file: portal/Dockerfile.worker
+          context: portal/
           push: true
           tags: topiaas/portalworker:${{ steps.vars.outputs.sha_short }}
