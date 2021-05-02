@@ -24,4 +24,4 @@ jobs:
           file: engine/orangeml/Dockerfile.orange
           context: engine/orangeml/
           push: true
-          tags: topiaas/orangeml:${{ SHA8 }}
+          tags: topiaas/orangeml:$SHA8
