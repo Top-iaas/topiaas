@@ -5,7 +5,7 @@ metadata:
   name: topiaas-ingress
 spec:
   rules:
-    - host: "wwww.topiaas.ml"
+    - host: "www.topiaas.ml"
       http:
         paths:
         - path: /
