@@ -28,5 +28,5 @@ jobs:
           tags: topiaas/orangeml:${{ github.sha }}
           
       - name: Prune Server
-        run: docker system prune -f
+        run: docker system prune -a -f
         
