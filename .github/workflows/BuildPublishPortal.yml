@@ -26,6 +26,7 @@ jobs:
           context: portal/
           push: true
           tags: topiaas/portal:${{ github.sha }}
+          
       - name: Prune Server
         run: docker system prune -f
           
