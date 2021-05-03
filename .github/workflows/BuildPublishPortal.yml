@@ -3,7 +3,7 @@ name: Build and push portal image
 on:
   push:
     paths: 
-      -"portal/**"
+      - 'portal/**'
   workflow_dispatch:
   
 jobs:
