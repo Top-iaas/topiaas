@@ -28,7 +28,7 @@ jobs:
           tags: topiaas/portal:${{ github.sha }}
           
       - name: Prune Server
-        run: docker system prune -f
+        run: docker system prune -a -f
           
   BuildWorker:
     runs-on: self-hosted
@@ -51,7 +51,7 @@ jobs:
           tags: topiaas/portalworker:${{ github.sha }}
       
       - name: Prune Server
-        run: docker system prune -f
+        run: docker system prune -a -f
         
   Deploy:
     runs-on: self-hosted
