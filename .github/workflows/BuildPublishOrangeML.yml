@@ -29,7 +29,7 @@ jobs:
   Deploy:
     runs-on: self-hosted
     needs: Build
-    if: ${{ github.ref == "refs/heads/master"}}
+    if: ${{ github.ref == 'refs/heads/master' }}
     environment:
       name: ApproveKubePatching
     steps:
