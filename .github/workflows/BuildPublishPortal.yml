@@ -4,6 +4,10 @@ on:
   push:
     paths: 
       -"portal/**"
+      
+  pull_request:
+    paths:
+      -"portal/**"
   workflow_dispatch:
   
 jobs:
