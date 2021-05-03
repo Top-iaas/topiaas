@@ -14,3 +14,8 @@ def index():
 def about():
     editable_html_obj = EditableHTML.get_editable_html("about")
     return render_template("main/about.html", editable_html_obj=editable_html_obj)
+
+
+@main.route("/demo")
+def demo():
+    return render_template("main/demo.html")
