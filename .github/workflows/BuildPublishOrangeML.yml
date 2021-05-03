@@ -34,6 +34,6 @@ jobs:
       name: ApproveKubePatching
     steps:
       - name: Copy KubeConfig
-        run: echo ${{ secrets.KUBECONFIG }} > ~/.kube/config
+        run: echo ${{ secrets.KUBECONFIG }} | base64 -d > ~/.kube/config
       - name: Patch Deployment
         run: kubectl patch deployment topiaas-deployment --patch '{"spec":{"template":{"spec":{"containers":[{"name":"topiaas","image":"topiaas/orangeml:${{ github.sha }}"}]}}}}'
