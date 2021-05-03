@@ -26,6 +26,8 @@ jobs:
           context: portal/
           push: true
           tags: topiaas/portal:${{ github.sha }}
+      - name: Prune Server
+        run: docker system prune -f
           
   BuildWorker:
     runs-on: self-hosted
@@ -52,7 +54,7 @@ jobs:
         
   Deploy:
     runs-on: self-hosted
-    needs: BuildWorker
+    needs: BuildPortal
     if: ${{ github.ref == 'refs/heads/master' }}
     environment:
       name: ApproveKubePatching
