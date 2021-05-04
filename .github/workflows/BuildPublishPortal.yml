@@ -34,10 +34,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u  ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          
 
       - name: Build and push portal worker
         uses: docker/build-push-action@v2
