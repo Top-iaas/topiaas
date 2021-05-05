@@ -7,23 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  Build:
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         
       - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Declare some variables
-        id: vars
-        shell: bash
-        run: |
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u  ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
           
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -31,4 +22,8 @@ jobs:
           file: engine/orangeml/Dockerfile.orange
           context: engine/orangeml/
           push: true
-          tags: topiaas/orangeml:${{ steps.vars.outputs.sha_short }}
+          tags: topiaas/orangeml:${{ github.sha }}
+          
+      - name: Prune Server
+        run: docker system prune -a -f
+        

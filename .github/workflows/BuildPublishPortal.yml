@@ -3,27 +3,18 @@ name: Build and push portal image
 on:
   push:
     paths: 
-      -"portal/**"
+      - 'portal/**'
   workflow_dispatch:
   
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  BuildPortal:
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         
       - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      - name: Declare some variables
-        id: vars
-        shell: bash
-        run: |
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u  ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
           
       - name: Build and push portal
         uses: docker/build-push-action@v2
@@ -31,12 +22,41 @@ jobs:
           file: portal/Dockerfile
           context: portal/
           push: true
-          tags: topiaas/portal:${{ steps.vars.outputs.sha_short }}
+          tags: topiaas/portal:${{ github.sha }}
           
+      - name: Prune Server
+        run: docker system prune -a -f
+          
+  BuildWorker:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u  ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          
+
       - name: Build and push portal worker
         uses: docker/build-push-action@v2
         with:
           file: portal/Dockerfile.worker
           context: portal/
           push: true
-          tags: topiaas/portalworker:${{ steps.vars.outputs.sha_short }}
+          tags: topiaas/portalworker:${{ github.sha }}
+      
+      - name: Prune Server
+        run: docker system prune -a -f
+        
+  Deploy:
+    runs-on: self-hosted
+    needs: BuildPortal
+    if: ${{ github.ref == 'refs/heads/master' }}
+    environment:
+      name: ApproveKubePatching
+    steps:
+      - name: Copy KubeConfig
+        run: echo -n "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+      - name: Patch Deployment
+        run: kubectl patch deployment topiaas-deployment --patch '{"spec":{"template":{"spec":{"containers":[{"name":"topiaas","image":"topiaas/portal:${{ github.sha }}"}]}}}}'
+

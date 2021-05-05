@@ -324,3 +324,17 @@ def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for("main.index"))
     return render_template("account/unconfirmed.html")
+
+
+@account.route("/dashboard", methods=["GET", "POST"])
+@login_required
+def dashboard():
+    """User dashboard page."""
+    return render_template("account/dashboard.html")
+
+
+@account.route("/demo", methods=["GET", "POST"])
+@login_required
+def demo():
+    """Instance of orangeML"""
+    return render_template("account/demo.html")
