@@ -8,10 +8,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: create Tags
-        run: orangemlTAG=topiaas/orangeml:${{ github.sha }}
+        run: echo '::set-output name=ORANGE_TAG::topiaas/orangeml:${{ github.sha }}'
+        id: tag
       - name: create latest
-        run: orangemlTAG=topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: ${{ steps.tag.outputs.ORANGE_TAG }}=topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest
       - name: view result
-        run: echo $orangemlTAG
+        run: echo ${{ steps.tag.outputs.ORANGE_TAG }}
      
         
