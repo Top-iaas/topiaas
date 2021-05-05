@@ -14,6 +14,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: echo "::set-env name=ORANGE_TAG::topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest"
       - name: view result
-        run: echo ${{ steps.tag.outputs.ORANGE_TAG }}
+        run: echo $ORANGE_TAG
      
         
