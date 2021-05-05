@@ -1,0 +1,17 @@
+name: Build and push orangeml image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Build:
+    runs-on: self-hosted
+    steps:
+      - name: create Tags
+        run: orangemlTAG=topiaas/orangeml:${{ github.sha }}
+      - name: create latest
+        run: orangemlTAG=topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest
+      - name: view result
+        run: echo orangemlTAG
+     
+        
