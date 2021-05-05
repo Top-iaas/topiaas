@@ -17,4 +17,4 @@ COPY . /app
 #RUN python3 manage.py recreate_db && python3 manage.py setup_dev && python3 manage.py add_fake_data
 
 # ENTRYPOINT ["python3", "-u" ,"manage.py", "runserver"]
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["sh", "portal-entrypoint.sh"]
