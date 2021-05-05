@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: topiaas
-        image: topiaas/portal:0e2fa894c8e7ceabd2e53a0ccd34fbff4f5c9437
+        image: topiaas/portal:latest
         ports:
         - containerPort: 5000
         env:
