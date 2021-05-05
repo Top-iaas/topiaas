@@ -31,6 +31,13 @@ class Config:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
 
+    # Database
+    DATABASE_USER = os.environ.get("DATABASE_USER")
+    DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
+    DATABASE_SERVICE_NAME = os.environ.get("DATABASE_SERVICE_NAME")
+    DATABASE_PORT = os.environ.get("DATABASE_PORT", 5432)
+    DEFAULT_DATABASE_URI = f"postgres://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_SERVICE_NAME}:{DATABASE_PORT}/db"
+
     # Analytics
     GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID", "")
     SEGMENT_API_KEY = os.environ.get("SEGMENT_API_KEY", "")
@@ -65,7 +72,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DEV_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
+        "DEV_DATABASE_URL", Config.DEFAULT_DATABASE_URI
     )
 
     @classmethod
@@ -79,7 +86,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "TEST_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-test.sqlite")
+        "TEST_DATABASE_URL", Config.DEFAULT_DATABASE_URI
     )
     WTF_CSRF_ENABLED = False
 
@@ -95,7 +102,7 @@ class ProductionConfig(Config):
     DEBUG = False
     USE_RELOADER = False
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data.sqlite")
+        "DATABASE_URL", Config.DEFAULT_DATABASE_URI
     )
     SSL_DISABLE = os.environ.get("SSL_DISABLE", "True") == "True"
 

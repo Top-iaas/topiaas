@@ -10,6 +10,7 @@
 		"postgres",
 		"redis"
 	],
+	"postCreateCommand": "cd portal && python manage.py db migrate && python manage.py db upgrade",
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/zsh"
 	},
