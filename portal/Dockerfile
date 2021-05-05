@@ -17,4 +17,4 @@ COPY . /app
 #RUN python3 manage.py recreate_db && python3 manage.py setup_dev && python3 manage.py add_fake_data
 
 # ENTRYPOINT ["python3", "-u" ,"manage.py", "runserver"]
-ENTRYPOINT ["gunicorn", "manage:app"]
+ENTRYPOINT ["gunicorn", "manage:app", "--bind", "0.0.0.0:8080"]
