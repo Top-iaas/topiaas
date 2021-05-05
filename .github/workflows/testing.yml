@@ -1,4 +1,4 @@
-name: Build and push orangeml image
+name: Testing tags
 
 on:
   workflow_dispatch:
