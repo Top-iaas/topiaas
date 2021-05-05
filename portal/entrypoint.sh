@@ -1,3 +1,4 @@
+#!/bin/sh 
 echo "Running db migrations ..."
 python manage.py db upgrade
 echo "db migrations ran successfully"
