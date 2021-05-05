@@ -15,14 +15,22 @@ jobs:
         
       - name: Login to DockerHub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u  ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          
+        
+      - name: create Tags
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "ORANGE_TAG=topiaas/orangeml:${{ github.sha }}" >> $GITHUB_ENV
+        
+      - name: create latest
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: echo "ORANGE_TAG=topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest" >> $GITHUB_ENV
+        
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           file: engine/orangeml/Dockerfile.orange
           context: engine/orangeml/
           push: true
-          tags: topiaas/orangeml:${{ github.sha }}
+          tags: ${{ env.ORANGE_TAG }}
           
       - name: Prune Server
         run: docker system prune -a -f
