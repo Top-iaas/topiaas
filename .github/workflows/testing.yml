@@ -12,6 +12,6 @@ jobs:
       - name: create latest
         run: orangemlTAG=topiaas/orangeml:${{ github.sha }},topiaas/orangeml:latest
       - name: view result
-        run: echo orangemlTAG
+        run: echo $orangemlTAG
      
         
