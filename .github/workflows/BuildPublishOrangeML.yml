@@ -32,6 +32,12 @@ jobs:
           push: true
           tags: ${{ env.ORANGE_TAG }}
           
-      - name: Prune Server
-        run: docker system prune -a -f
-        
+  PruneServer:
+      runs-on: self-hosted
+      needs: [Build]
+      environment:
+        name: ApproveKubePatching
+      steps:
+        - name: prune
+          run: docker system prune -a -f
+
