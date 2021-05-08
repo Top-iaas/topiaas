@@ -32,11 +32,11 @@ spec:
           - name: DATABASE_PORT
             value: "5432"
           - name: DATABASE_SERVICE_NAME
-            value: my-release-postgresql-ha-postgresql 
+            value: postgres-postgresql-ha-pgpool
           - name: DATABASE_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: my-release-postgresql-ha-postgresql
+                name: postgres-postgresql-ha-postgresql
                 key: postgresql-password
           - name: SECRET_KEY
             value: sercet_key #TODO: change
