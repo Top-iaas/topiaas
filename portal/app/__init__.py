@@ -82,4 +82,8 @@ def create_app(config):
 
     app.register_blueprint(admin_blueprint, url_prefix="/admin")
 
+    from .apps import apps as apps_blueprint
+
+    app.register_blueprint(apps_blueprint, url_prefix="/apps")
+
     return app

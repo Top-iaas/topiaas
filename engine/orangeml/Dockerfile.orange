@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 ENV USER=root
-ENV PASSWORD=password1
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
 RUN apt-get update && \
@@ -15,8 +14,6 @@ RUN wget https://netix.dl.sourceforge.net/project/virtualgl/2.6.3/virtualgl_2.6.
 	dpkg -i turbovnc_*.deb && \
 	mkdir ~/.vnc/ && \
 	mkdir ~/.dosbox && \
-	echo $PASSWORD | vncpasswd -f > ~/.vnc/passwd && \
-	chmod 0600 ~/.vnc/passwd && \
 	echo "set border 1" > ~/.ratpoisonrc  && \
 	echo "exec orange-canvas">> ~/.ratpoisonrc && \
 	openssl req -x509 -nodes -newkey rsa:2048 -keyout ~/novnc.pem -out ~/novnc.pem -days 3650 -subj "/C=US/ST=NY/L=NY/O=NY/OU=NY/CN=NY emailAddress=email@example.com"
