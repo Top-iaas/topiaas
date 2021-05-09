@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-worker
+  labels:
+    app: portal-worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: portal-worker
+  template:
+    metadata:
+      labels:
+        app: portal-worker
+    spec:
+      containers:
+      - name: portal-worker
+        image: topiaas/portalworker:latest
+        env:
+          - name: APP_NAME
+            value: Topiaas
+          - name: FLASK_CONFIG
+            value: production
+          - name: REDISTOGO_URL
+            value: "http://redis:6379"
+          - name: DATABASE_USER
+            value: devel
+          - name: DATABASE_PORT
+            value: "5432"
+          - name: DATABASE_SERVICE_NAME
+            value: my-release-postgresql-ha-postgresql 
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: my-release-postgresql-ha-postgresql
+                key: postgresql-password
+          - name: SECRET_KEY
+            value: sercet_key #TODO: change

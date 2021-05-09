@@ -1,0 +1,40 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="ui stackable grid container">
+    <div class="sixteen wide tablet twelve wide computer centered column">
+        <a class="ui basic compact button" href="{{ url_for('account.dashboard') }}">
+            <i class="caret left icon"></i>
+            Back to dashboard
+        </a>
+        <h2 class="ui header">
+            Running Apps
+            <div class="sub header">
+                View and manage your apps
+            </div>
+        </h2>
+
+        {# Use overflow-x: scroll so that mobile views don't freak out
+        # when the table is too wide #}
+        <div style="overflow-x: scroll;">
+            <table class="ui searchable sortable unstackable selectable celled table">
+                <thead>
+                    <tr>
+                        <th class="sorted ascending">App Class</th>
+                        <th class="sorted ascending">App Name</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in apps | sort(attribute='name') %}
+
+                    <td>{{ app.app_type }}</td>
+                    <td>{{ app.name }}</td>
+                    <td>{{ app.url }}</td>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
