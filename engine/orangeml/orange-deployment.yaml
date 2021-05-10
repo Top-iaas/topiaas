@@ -19,14 +19,3 @@ spec:
         image: topiaas/orangeml
         ports:
         - containerPort: 80
-      #   volumeMounts:
-      #     - name: vncpasswd
-      #       mountPath: "/root/.vnc"
-      # volumes:
-      # - name: foo
-      #   secret:
-      #     secretName: vnc-0
-      #     items:
-      #     - key: password
-      #       path: passwd
-      #       mode: 0600

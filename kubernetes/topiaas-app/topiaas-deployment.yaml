@@ -6,7 +6,7 @@ metadata:
   labels:
     app: topiaas
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: topiaas
@@ -16,27 +16,27 @@ spec:
         app: topiaas
     spec:
       containers:
-      - name: topiaas
-        image: topiaas/portal:latest
-        ports:
-        - containerPort: 5000
-        env:
-          - name: APP_NAME
-            value: Topiaas
-          - name: FLASK_CONFIG
-            value: production
-          - name: REDISTOGO_URL
-            value: "http://redis:6379"
-          - name: DATABASE_USER
-            value: devel
-          - name: DATABASE_PORT
-            value: "5432"
-          - name: DATABASE_SERVICE_NAME
-            value: postgres-postgresql-ha-pgpool
-          - name: DATABASE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgres-postgresql-ha-postgresql
-                key: postgresql-password
-          - name: SECRET_KEY
-            value: sercet_key #TODO: change
+        - name: topiaas
+          image: topiaas/portal:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: APP_NAME
+              value: Topiaas
+            - name: FLASK_CONFIG
+              value: production
+            - name: REDISTOGO_URL
+              value: "http://redis-cluster-master:6379"
+            - name: DATABASE_USER
+              value: devel
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_SERVICE_NAME
+              value: postgres-postgresql-ha-pgpool
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-postgresql-ha-postgresql
+                  key: postgresql-password
+            - name: SECRET_KEY
+              value: sercet_key #TODO: change
