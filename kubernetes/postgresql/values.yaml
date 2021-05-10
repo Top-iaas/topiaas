@@ -4,10 +4,13 @@ postgresql:
   username: devel
   password: 12345
   database: db
-  replicaCount: 3
+  replicaCount: 2
+  repmgrPassword: 12345
 volumePermissions:
   enabled: true
 persistence:
   size: 2Gi
   storageClass: manual
+pgpool:
+  childLifeTime: 0
 clusterDomain: cluster.topiaas
