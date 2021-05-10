@@ -32,8 +32,8 @@ jobs:
           push: true
           tags: ${{ env.PORTAL_TAG}}
           
-      - name: Prune Server
-        run: docker system prune -a -f
+      - name: prune
+        run: docker system prune -a -f 
           
   BuildWorker:
     runs-on: self-hosted
@@ -59,9 +59,10 @@ jobs:
           context: portal/
           push: true
           tags: ${{ env.WORKER_TAG }}
+          
+      - name: prune
+        run: docker system prune -a -f   
       
-      - name: Prune Server
-        run: docker system prune -a -f
         
   Deploy:
     runs-on: self-hosted

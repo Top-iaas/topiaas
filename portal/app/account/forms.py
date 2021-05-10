@@ -6,9 +6,10 @@ from wtforms.fields import (
     PasswordField,
     StringField,
     SubmitField,
+    IntegerField,
 )
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, EqualTo, InputRequired, Length
+from wtforms.validators import Email, EqualTo, InputRequired, Length, NumberRange
 
 from app.models import User
 
@@ -29,6 +30,13 @@ class RegistrationForm(FlaskForm):
         validators=[InputRequired(), EqualTo("password2", "Passwords must match")],
     )
     password2 = PasswordField("Confirm password", validators=[InputRequired()])
+    vcpu_limit = IntegerField(
+        "Maximum CPU capacity",
+        validators=[InputRequired(), NumberRange(min=1)],
+    )
+    memory_limit = IntegerField(
+        "Maximum memory Capacity", validators=[InputRequired(), NumberRange(min=512)]
+    )
     submit = SubmitField("Register")
 
     def validate_email(self, field):
@@ -37,6 +45,17 @@ class RegistrationForm(FlaskForm):
                 "Email already registered. (Did you mean to "
                 '<a href="{}">log in</a> instead?)'.format(url_for("account.login"))
             )
+
+
+class ChangeCapacityLimits(FlaskForm):
+    vcpu_limit = IntegerField(
+        "Maximum CPU capacity",
+        validators=[InputRequired(), NumberRange(min=1)],
+    )
+    memory_limit = IntegerField(
+        "Maximum memory Capacity", validators=[InputRequired(), NumberRange(min=512)]
+    )
+    submit = SubmitField("Update")
 
 
 class RequestResetPasswordForm(FlaskForm):

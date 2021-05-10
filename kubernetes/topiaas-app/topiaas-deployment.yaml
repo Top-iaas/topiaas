@@ -17,14 +17,26 @@ spec:
     spec:
       containers:
       - name: topiaas
-        image: topiaas/portal:94d07b9 #TODO tag Should be set dynamically
+        image: topiaas/portal:latest
         ports:
         - containerPort: 5000
         env:
-          - name: SECRET_KEY
-            value: sercet_key #TODO: change
+          - name: APP_NAME
+            value: Topiaas
           - name: FLASK_CONFIG
             value: production
-          - name: DATABASE_URL
-            # TODO: Use CI Secrets for username and password
-            value: postgres://devel:12345@my-release-postgresql-ha-postgresql:5432/db
+          - name: REDISTOGO_URL
+            value: "http://redis:6379"
+          - name: DATABASE_USER
+            value: devel
+          - name: DATABASE_PORT
+            value: "5432"
+          - name: DATABASE_SERVICE_NAME
+            value: postgres-postgresql-ha-pgpool
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-postgresql-ha-postgresql
+                key: postgresql-password
+          - name: SECRET_KEY
+            value: sercet_key #TODO: change

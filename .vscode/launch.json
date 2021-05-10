@@ -15,6 +15,18 @@
             ]
         },
         {
+            "name": "ha-portal",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/portal",
+            "program": "/usr/local/bin/gunicorn",
+            "args": [
+                "manage:app",
+                "--bind",
+                "0.0.0.0:8080"
+            ],
+        },
+        {
             "name": "Worker",
             "type": "python",
             "request": "launch",
