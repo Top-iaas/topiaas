@@ -326,11 +326,11 @@ def unconfirmed():
     return render_template("account/unconfirmed.html")
 
 
-@account.route("/dashboard")
+@account.route("/")
 @login_required
-def dashboard():
+def index():
     """User dashboard page."""
-    return render_template("account/dashboard.html")
+    return render_template("account/index.html")
 
 
 @account.route("/demo", methods=["GET", "POST"])
