@@ -326,7 +326,7 @@ def unconfirmed():
     return render_template("account/unconfirmed.html")
 
 
-@account.route("/")
+@account.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     """User dashboard page."""
