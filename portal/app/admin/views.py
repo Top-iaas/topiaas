@@ -32,6 +32,14 @@ def index():
     return render_template("admin/index.html")
 
 
+@admin.route("/orangeml")
+@login_required
+@admin_required
+def orangeml_instance():
+    """Admin dashboard page."""
+    return redirect("https://topiaas.ml/orangeml-0/vnc.html")
+
+
 @admin.route("/new-user", methods=["GET", "POST"])
 @login_required
 @admin_required
