@@ -26,12 +26,7 @@ render_menu_items.
 ]%}
 {% set user = [] %}
 {% if current_user.is_authenticated %}
-{% set current_user_role = current_user.role.index %}
-{% if current_user_role == 'main' %}
-{% set user = ([('account.index', current_user.role.name + ' Dashboard', 'user')]) %}
-{% else %}
-{% set user = ([(current_user.role.index + '.index', current_user.role.name + ' Dashboard', 'user')]) %}
-{% endif %}
+{% set user = ([('account.dashboard', current_user.role.name + ' Dashboard', 'user')]) %}
 {% endif %}
 {{ render_menu_items( endpoints + user ) }}
 {% endmacro %}
