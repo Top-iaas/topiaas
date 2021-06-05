@@ -1,5 +1,7 @@
 from app.lib.enumeration import SupportedApps
+from app.business import k8s
 from flask import abort, Response
+from flask_login import current_user
 
 
 def list_supported_apps():
@@ -20,5 +22,18 @@ def validate_app_request(user, vcpu_limit, memory_limit):
         )
 
 
-def deploy_app(vcpu_limit, memory_limit, app_type):
-    pass
+def _get_app_name(app_type, app_id):
+    return f"{app_type}-{current_user.id}-{app_id}"
+
+
+def deploy_app(vcpu_limit, memory_limit, app_type, app_id):
+    name = _get_app_name(app_type, app_id)
+    if app_type == SupportedApps.ORANGE_ML:
+        return k8s.create_orangeml_instance(
+            name=name, cpu_limit=vcpu_limit, memory_limit=memory_limit
+        )
+
+
+def remove_app(app_type, app_id):
+    name = _get_app_name(app_type, app_id)
+    return k8s.delete_app_instance(name)

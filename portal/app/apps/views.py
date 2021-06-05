@@ -1,21 +1,9 @@
-from flask import (
-    Blueprint,
-    abort,
-    flash,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Blueprint, flash, redirect, render_template, url_for, jsonify
 from flask_login import current_user, login_required
-from flask_rq import get_queue
 
 from app import db
 from app.apps.forms import DeployNewApp
-from app.decorators import admin_required
-from app.email import send_email
-from app.models import EditableHTML, AppInstance, User
-from flask import jsonify
+from app.models import AppInstance, User
 import app.business.apps as apps_buzz
 
 apps = Blueprint("apps", __name__)
@@ -36,17 +24,21 @@ def new_orangeml():
     if form.validate_on_submit():
         vcpu_limit, memory_limit = form.vcpu_limit.data, form.memory_limit.data
         apps_buzz.validate_app_request(current_user, vcpu_limit, memory_limit)
-        apps_buzz.deploy_app(
-            vcpu_limit, memory_limit, app_type=apps_buzz.SupportedApps.ORANGE_ML
-        )
         app_instance = AppInstance(
             app_type=apps_buzz.SupportedApps.ORANGE_ML.value,
             name=form.name.data,
-            url="https://google.com",
-            user=current_user.id,
+            owner=current_user.id,
+            users=[current_user],
             vcpu_limit=form.vcpu_limit.data,
             memory_limit=form.memory_limit.data,
         )
+        app_url = apps_buzz.deploy_app(
+            vcpu_limit,
+            memory_limit,
+            app_type=apps_buzz.SupportedApps.ORANGE_ML,
+            app_id=app_instance.id,
+        )
+        app_instance.url = app_url
         db.session.add(app_instance)
         db.session.commit()
         flash(
@@ -56,34 +48,37 @@ def new_orangeml():
     return render_template("apps/new_app.html", form=form, app_name="Orange ML")
 
 
-@apps.route("/user/<int:user_id>/delete")
+@apps.route("/<int:app_id>/_delete")
 @login_required
-@admin_required
-def delete_user_request(user_id):
-    """Request deletion of a user's account."""
-    user = User.query.filter_by(id=user_id).first()
-    if user is None:
-        abort(404)
-    return render_template("admin/manage_user.html", user=user)
-
-
-@apps.route("/user/<int:user_id>/_delete")
-@login_required
-@admin_required
-def delete_user(user_id):
-    """Delete a user's account."""
-    if current_user.id == user_id:
-        flash(
-            "You cannot delete your own account. Please ask another "
-            "administrator to do this.",
-            "error",
-        )
+def delete_app_instance(app_id):
+    """Delete an application instance"""
+    user_apps = User.query.filter_by(id=current_user.id).first().apps
+    for app in user_apps:
+        if app.id == app_id:
+            apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
+            user_apps.remove(app)
+            db.session.delete(app)
+            db.session.commit()
+            flash(
+                f"Successfully deleted {app.app_type} App with id {app.id}." "success",
+            )
+            break
     else:
-        user = User.query.filter_by(id=user_id).first()
-        db.session.delete(user)
-        db.session.commit()
-        flash("Successfully deleted user %s." % user.full_name(), "success")
-    return redirect(url_for("admin.registered_users"))
+        flash(
+            f"User doesn't own application with ID {app_id}" "error",
+        )
+    return redirect(url_for("account.dashboard"))
+
+
+@apps.route("/<int:app_id>/_get", methods=["GET"])
+@login_required
+def get_app_instance(app_id):
+    app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
+    result = app.__dict__.copy()
+    result.pop("_sa_instance_state")
+    result.pop("index")
+    result["users"] = [u.id for u in app.users]
+    return jsonify(result)
 
 
 @apps.route("/supported", methods=["GET"])

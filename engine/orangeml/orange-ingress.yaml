@@ -8,17 +8,17 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
-    - host: "topiaas.ml"
-      http:
-        paths:
-        - path: /orangeml-0/(.*)
-          pathType: Prefix
-          backend:
-            service:
-              name: orangeml-service-0
-              port:
-                number: 80
+  - host: "topiaas.ml"
+    http:
+      paths:
+      - backend:
+          service:
+            name: orangeml-service-0
+            port:
+              number: 80
+        path: /orangeml-test-0/websockify
+        pathType: Prefix
   tls:
-    - hosts:
-      -  "topiaas.ml"
-      secretName: topiaas-ml-tls # TODO: change from being hardcoded
+  - hosts:
+    -  "topiaas.ml"
+    secretName: topiaas-ml-tls
