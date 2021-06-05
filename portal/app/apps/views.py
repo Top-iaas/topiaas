@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, url_for, jsonify
+from flask import Blueprint, flash, redirect, render_template, url_for, jsonify, abort
 from flask_login import current_user, login_required
 
 from app import db
@@ -32,6 +32,8 @@ def new_orangeml():
             vcpu_limit=form.vcpu_limit.data,
             memory_limit=form.memory_limit.data,
         )
+        db.session.add(app_instance)
+        db.session.flush()
         app_url = apps_buzz.deploy_app(
             vcpu_limit,
             memory_limit,
@@ -39,7 +41,6 @@ def new_orangeml():
             app_id=app_instance.id,
         )
         app_instance.url = app_url
-        db.session.add(app_instance)
         db.session.commit()
         flash(
             "Instance of Orange ML is being deployed",
@@ -48,11 +49,11 @@ def new_orangeml():
     return render_template("apps/new_app.html", form=form, app_name="Orange ML")
 
 
-@apps.route("/<int:app_id>/_delete")
+@apps.route("/delete/<int:app_id>")
 @login_required
 def delete_app_instance(app_id):
     """Delete an application instance"""
-    user_apps = User.query.filter_by(id=current_user.id).first().apps
+    user_apps = User.query.filter_by(id=current_user.id).first_or_404().apps
     for app in user_apps:
         if app.id == app_id:
             apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
@@ -64,13 +65,11 @@ def delete_app_instance(app_id):
             )
             break
     else:
-        flash(
-            f"User doesn't own application with ID {app_id}" "error",
-        )
-    return redirect(url_for("account.dashboard"))
+        abort(403)
+    return redirect(url_for("account.index"))
 
 
-@apps.route("/<int:app_id>/_get", methods=["GET"])
+@apps.route("/<int:app_id>", methods=["GET"])
 @login_required
 def get_app_instance(app_id):
     app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
