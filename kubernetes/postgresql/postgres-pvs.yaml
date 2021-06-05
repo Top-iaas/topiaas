@@ -6,6 +6,7 @@ metadata:
   labels:
     type: local
 spec:
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: manual
   capacity:
     storage: 2Gi
@@ -21,6 +22,7 @@ metadata:
   labels:
     type: local
 spec:
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: manual
   capacity:
     storage: 2Gi
@@ -36,6 +38,7 @@ metadata:
   labels:
     type: local
 spec:
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: manual
   capacity:
     storage: 2Gi

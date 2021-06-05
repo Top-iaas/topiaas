@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orangeml-deployment
+  name: orangeml-0
   labels:
     app: orangeml
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: orangeml
+      app: orangeml-0
   template:
     metadata:
       labels:
-        app: orangeml
+        app: orangeml-0
     spec:
       containers:
       - name: orangeml
-        image: orangeml
+        image: topiaas/orangeml
         ports:
         - containerPort: 80

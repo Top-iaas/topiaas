@@ -16,8 +16,10 @@ services:
 
   orangeml:
     build:
-      context: ".."
-      dockerfile: engine/orangeml/Dockerfile.orange
+      context: "../engine/orangeml"
+      dockerfile: Dockerfile.orange
+    environment:
+      PASSWORD: password2
     container_name: orangeml
     volumes:
       - ..:/workspace:cached

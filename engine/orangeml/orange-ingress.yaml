@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orangeml-0
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: "topiaas.ml"
+    http:
+      paths:
+      - backend:
+          service:
+            name: orangeml-service-0
+            port:
+              number: 80
+        path: /orangeml-test-0/websockify
+        pathType: Prefix
+  tls:
+  - hosts:
+    -  "topiaas.ml"
+    secretName: topiaas-ml-tls
