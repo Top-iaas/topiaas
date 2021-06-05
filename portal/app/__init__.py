@@ -6,19 +6,13 @@ from flask_compress import Compress
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_rq import RQ
-from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
 from config import config as Config
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-class SQLAlchemy(_BaseSQLAlchemy):
-    def apply_pool_defaults(self, app, options):
-        options = super().apply_pool_defaults(app, options)
-        options["pool_pre_ping"] = True
-        return options
 
 mail = Mail()
 db = SQLAlchemy()
