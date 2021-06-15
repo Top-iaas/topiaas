@@ -19,3 +19,6 @@ spec:
         image: topiaas/orangeml
         ports:
         - containerPort: 80
+        env:
+        - name: PASSWORD
+          value: password

@@ -58,8 +58,8 @@ class User(UserMixin, db.Model):
     apps = db.relationship(
         "AppInstance", secondary=app_user_association, back_populates="users"
     )
-    vcpu_limit = db.Column(db.Integer)
-    memory_limit = db.Column(db.Integer)
+    vcpu_limit = db.Column(db.Integer, default=0)
+    memory_limit = db.Column(db.Integer, default=0)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

@@ -21,6 +21,7 @@ class AppInstance(db.Model):
     )
     vcpu_limit = db.Column(db.Integer)
     memory_limit = db.Column(db.Integer)
+    password = db.Column(db.String(64), default="")
 
     def __repr__(self):
         return f"<App {self.name} ID {self.id}>"

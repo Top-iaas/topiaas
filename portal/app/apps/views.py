@@ -5,6 +5,8 @@ from app import db
 from app.apps.forms import DeployNewApp
 from app.models import AppInstance, User
 import app.business.apps as apps_buzz
+import string
+import random
 
 apps = Blueprint("apps", __name__)
 
@@ -24,6 +26,12 @@ def new_orangeml():
     if form.validate_on_submit():
         vcpu_limit, memory_limit = form.vcpu_limit.data, form.memory_limit.data
         apps_buzz.validate_app_request(current_user, vcpu_limit, memory_limit)
+        password = "".join(
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(8)
+        )
         app_instance = AppInstance(
             app_type=apps_buzz.SupportedApps.ORANGE_ML.value,
             name=form.name.data,
@@ -31,6 +39,7 @@ def new_orangeml():
             users=[current_user],
             vcpu_limit=form.vcpu_limit.data,
             memory_limit=form.memory_limit.data,
+            password=password,
         )
         db.session.add(app_instance)
         db.session.flush()
@@ -39,6 +48,7 @@ def new_orangeml():
             memory_limit,
             app_type=apps_buzz.SupportedApps.ORANGE_ML,
             app_id=app_instance.id,
+            password=password,
         )
         app_instance.url = app_url
         db.session.commit()
