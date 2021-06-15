@@ -330,11 +330,11 @@ def unconfirmed():
 @login_required
 def index():
     """User dashboard page."""
-    return render_template("account/index.html")
+    return render_template("account/index.html", apps=current_user.apps)
 
 
-@account.route("/demo", methods=["GET", "POST"])
+@account.route("<host>/<app_instance_id>/websockify", methods=["GET", "POST"])
 @login_required
-def demo():
+def demo(host, app_instance_id):
     """Instance of orangeML"""
-    return render_template("account/demo.html")
+    return render_template("account/demo.html", app_instance=app_instance_id)

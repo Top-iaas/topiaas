@@ -145,11 +145,11 @@
         } else {
             url = 'ws';
         }
-        url += '://' + '172.18.0.3';
+        url += '://' + 'topiaas.ml';
         if (port) {
-            url += ':' + '80';
+            url += ':' + '443';
         }
-        url += '/' + 'vnc.html';
+        url += '/' + "{{ app_instance }}" + '/websockify';
 
         // Creating a new RFB object will start a new connection
         rfb = new RFB(document.getElementById('screen'), url,

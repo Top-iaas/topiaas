@@ -122,17 +122,26 @@
 
         <div class="w3-panel">
             <div class="w3-row-padding" style="margin:0 -16px">
-
                 <h5>Available applications</h5>
                 <table class="w3-table w3-white">
-                    <tr class='clickable-row' data-href="https://topiaas.ml/orangeml-0/vnc.html">
+                    <tr>
+                        <th> </th>
+                        <th>Application</th>
+                        <th>Instance</th>
+                        <th>Duration</th>
+                    </tr>
+                    {% for app in apps | sort(attribute='name') %}
+                    <tr class='clickable-row' data-href={{ app.url }}>
                         <td><i class="fa fa-user w3-text-blue w3-large"></i></td>
                         <td>OrangeML</td>
+                        <td>{{ app.name }}</td>
                         <td><i>Ran for 10 mins</i></td>
                     </tr>
+                    {% endfor %}
                     <tr>
                         <td><i class="fa fa-bell w3-text-red w3-large"></i></td>
                         <td>Google Colab</td>
+                        <td>NLP_project</td>
                         <td><i>Ran for 15 mins</i></td>
                     </tr>
 
