@@ -20,6 +20,7 @@
             <table class="ui searchable sortable unstackable selectable celled table">
                 <thead>
                     <tr>
+                        <th class="sorted ascending">App Id</th>
                         <th class="sorted ascending">App Class</th>
                         <th class="sorted ascending">App Name</th>
                         <th>URL</th>
@@ -28,6 +29,7 @@
                 <tbody>
                     {% for app in apps | sort(attribute='name') %}
 
+                    <td>{{ app.id }}</td>
                     <td>{{ app.app_type }}</td>
                     <td>{{ app.name }}</td>
                     <td>{{ app.url }}</td>
