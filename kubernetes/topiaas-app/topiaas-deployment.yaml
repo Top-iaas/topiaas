@@ -15,6 +15,7 @@ spec:
       labels:
         app: topiaas
     spec:
+      serviceAccountName: app-manager-service-account
       containers:
         - name: topiaas
           image: topiaas/portal:latest
