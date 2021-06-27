@@ -1,3 +1,8 @@
+from sqlalchemy import Column, DateTime, String
+from sqlalchemy.sql import func
+
+from app.lib.enumeration import AppStatus
+
 from .. import db
 
 app_user_association = db.Table(
@@ -22,6 +27,9 @@ class AppInstance(db.Model):
     vcpu_limit = db.Column(db.Integer)
     memory_limit = db.Column(db.Integer)
     password = db.Column(db.String(64), default="")
+    state = Column(String(64), server_default=AppStatus.DEPLOYED.value)
+    deploy_ts = Column(DateTime(), server_default=func.now())
+    delete_ts = Column(DateTime())
 
     def __repr__(self):
         return f"<App {self.name} ID {self.id}>"

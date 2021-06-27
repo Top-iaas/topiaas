@@ -1,14 +1,23 @@
-from flask import Blueprint, flash, redirect, render_template, url_for, jsonify, abort
-from flask_login import current_user, login_required
+import random
+import string
+from datetime import datetime
+from os import getenv
+from time import time
 
+import app.business.apps as apps_buzz
 from app import db
 from app.apps.forms import DeployNewApp
+from app.lib.enumeration import AppStatus
 from app.models import AppInstance, User
-import app.business.apps as apps_buzz
-import string
-import random
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
+from flask.globals import request
+from flask_login import current_user, login_required
+from werkzeug.exceptions import BadRequest
 
 apps = Blueprint("apps", __name__)
+
+CPU_PRICE = getenv("CPU_UNIT_PRICE", 2)
+MEMORY_PRICE = getenv("MEMORY_UNIT_PRICE", 5)
 
 
 @apps.route("/")
@@ -67,8 +76,8 @@ def delete_app_instance(app_id):
     for app in user_apps:
         if app.id == app_id:
             apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
-            user_apps.remove(app)
-            db.session.delete(app)
+            app.state = AppStatus.DELETED.value
+            app.delete_ts = datetime.now()
             db.session.commit()
             flash(
                 f"Successfully deleted {app.app_type} App with id {app.id}." "success",
@@ -84,6 +93,8 @@ def delete_app_instance(app_id):
 def get_app_instance(app_id):
     app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
     result = app.__dict__.copy()
+    result["delete_ts"] = int(result["delete_ts"].timestamp())
+    result["deploy_ts"] = int(result["deploy_ts"].timestamp())
     result.pop("_sa_instance_state")
     result.pop("index")
     result["users"] = [u.id for u in app.users]
@@ -94,3 +105,56 @@ def get_app_instance(app_id):
 @login_required
 def list_supported():
     return jsonify({"SupportedApps": apps_buzz.list_supported_apps()})
+
+
+@apps.route("/<int:app_id>/consumption", methods=["GET"])
+@login_required
+def get_app_usage_billing(app_id: int):
+    from_ = request.args.get("from")
+    if from_ is None:
+        raise BadRequest("from query arg missing")
+    if not from_.isnumeric():
+        raise BadRequest("`from` query arg must be a valid integer")
+    to = request.args.get("to")
+    if to is None:
+        raise BadRequest("to query arg missing")
+    if not to.isnumeric():
+        raise BadRequest("`to` query arg must be a valid integer")
+    from_ = int(from_)
+    to = int(to)
+
+    if from_ >= to:
+        raise BadRequest("`from` should be smaller than `to`")
+
+    if from_ > time():
+        raise BadRequest("`from` should not be greater than current time")
+
+    app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
+
+    app_from: int = int(app.deploy_ts.timestamp())
+    app_to: int = int(
+        app.delete_ts.timestamp() if app.state == AppStatus.DELETED.value else time()
+    )
+
+    left_boundary = max(app_from, from_)
+    right_boundary = min(app_to, to)
+
+    if left_boundary >= right_boundary:
+        raise BadRequest("There is no consumption in the specified period")
+
+    billing_seconds = right_boundary - left_boundary
+
+    usage = {
+        "seconds": billing_seconds,
+        "from": left_boundary,
+        "to": right_boundary,
+        "memory_price": MEMORY_PRICE,
+        "cpu_price": CPU_PRICE,
+        "memory_consumption": round(
+            billing_seconds / 3600 * MEMORY_PRICE * app.memory_limit, 2
+        ),
+        "cpu_consumption": round(
+            billing_seconds / 3600 * CPU_PRICE * app.vcpu_limit, 2
+        ),
+    }
+    return jsonify(usage)
