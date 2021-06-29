@@ -26,11 +26,14 @@ def _get_app_name(app_type, app_id):
     return f"{app_type}-{current_user.id}-{app_id}"
 
 
-def deploy_app(vcpu_limit, memory_limit, app_type, app_id):
+def deploy_app(vcpu_limit, memory_limit, app_type, app_id, password):
     name = _get_app_name(app_type, app_id)
     if app_type == SupportedApps.ORANGE_ML:
         return k8s.create_orangeml_instance(
-            name=name, cpu_limit=vcpu_limit, memory_limit=memory_limit
+            name=name,
+            cpu_limit=vcpu_limit,
+            memory_limit=memory_limit,
+            password=password,
         )
 
 

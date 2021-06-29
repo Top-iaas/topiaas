@@ -20,9 +20,10 @@
             <table class="ui searchable sortable unstackable selectable celled table">
                 <thead>
                     <tr>
-                        <th class="sorted ascending">App Id</th>
-                        <th class="sorted ascending">App Class</th>
-                        <th class="sorted ascending">App Name</th>
+                        <th class="sorted ascending">Id</th>
+                        <th class="sorted ascending">Class</th>
+                        <th class="sorted ascending">Name</th>
+                        <th class="sorted ascending">Password</th>
                         <th>URL</th>
                     </tr>
                 </thead>
@@ -32,6 +33,7 @@
                     <td>{{ app.id }}</td>
                     <td>{{ app.app_type }}</td>
                     <td>{{ app.name }}</td>
+                    <td>{{ app.password }}</td>
                     <td>{{ app.url }}</td>
                     {% endfor %}
                 </tbody>

@@ -21,6 +21,10 @@ class Config:
         SECRET_KEY = "SECRET_KEY_ENV_VAR_NOT_SET"
         print("SECRET KEY ENV VAR NOT SET! SHOULD NOT SEE IN PRODUCTION")
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
 
     # Email
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.sendgrid.net")

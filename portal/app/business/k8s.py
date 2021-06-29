@@ -12,7 +12,7 @@ core_v1_api = client.CoreV1Api()
 networking_v1_beta1_api = client.NetworkingV1beta1Api()
 
 
-def create_orangeml_deployment_body(name, cpu_limit, memory_limit):
+def create_orangeml_deployment_body(name, cpu_limit, memory_limit, password):
     container = client.V1Container(
         name=name,
         image="topiaas/orangeml",
@@ -20,6 +20,7 @@ def create_orangeml_deployment_body(name, cpu_limit, memory_limit):
         resources=client.V1ResourceRequirements(
             limits={"cpu": f"{cpu_limit * 1000}m", "memory": f"{memory_limit}Mi"},
         ),
+        env=[{"name": "PASSWORD", "value": password}],
     )
 
     template = client.V1PodTemplateSpec(
@@ -117,10 +118,12 @@ def create_ingress(name, path, service_name, service_port):
     networking_v1_beta1_api.create_namespaced_ingress(namespace="default", body=body)
 
 
-def create_orangeml_instance(name, cpu_limit, memory_limit):
+def create_orangeml_instance(name, cpu_limit, memory_limit, password):
     rand_suffix = str(uuid.uuid4()).split("-")[0]
     ingress_path = f"/{name}-{rand_suffix}/websockify"
-    deployment_body = create_orangeml_deployment_body(name, cpu_limit, memory_limit)
+    deployment_body = create_orangeml_deployment_body(
+        name, cpu_limit, memory_limit, password
+    )
     create_deployment(name=name, deployment=deployment_body)
     time.sleep(2)
     create_service(name=name, app_name=name, port=80, target_port=80)
