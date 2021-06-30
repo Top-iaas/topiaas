@@ -93,7 +93,8 @@ def delete_app_instance(app_id):
 def get_app_instance(app_id):
     app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
     result = app.__dict__.copy()
-    result["delete_ts"] = int(result["delete_ts"].timestamp())
+    if result["delete_ts"]:
+        result["delete_ts"] = int(result["delete_ts"].timestamp())
     result["deploy_ts"] = int(result["deploy_ts"].timestamp())
     result.pop("_sa_instance_state")
     result.pop("index")

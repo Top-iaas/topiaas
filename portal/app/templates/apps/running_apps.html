@@ -1,6 +1,30 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    html,
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+        font-family: "Raleway", sans-serif
+    }
+
+    tr:hover {
+        background-color: dimgray;
+        cursor: pointer;
+    }
+</style>
+
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
         <a class="ui basic compact button" href="{{ url_for('account.index') }}">
@@ -25,19 +49,25 @@
                         <th class="sorted ascending">Name</th>
                         <th class="sorted ascending">Password</th>
                         <th>URL</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for app in apps | sort(attribute='name') %}
-
+                    {% if app.state != "deleted" %}
                     <td>{{ app.id }}</td>
                     <td>{{ app.app_type }}</td>
                     <td>{{ app.name }}</td>
                     <td>{{ app.password }}</td>
                     <td>{{ app.url }}</td>
+                    <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        <div class="w3-container" style="display: flex; justify-content: flex-end;  padding-top: 10px">
+            <a href="/apps/new/orangeml" class="w3-button w3-blue">New instance</a>
         </div>
     </div>
 </div>

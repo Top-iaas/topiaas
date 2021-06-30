@@ -333,6 +333,13 @@ def index():
     return render_template("account/index.html", apps=current_user.apps)
 
 
+@account.route("/billing", methods=["GET", "POST"])
+@login_required
+def billing():
+    """User billing page."""
+    return render_template("account/billing.html", apps=current_user.apps)
+
+
 @account.route("<host>/<app_instance_id>/websockify", methods=["GET", "POST"])
 @login_required
 def demo(host, app_instance_id):
