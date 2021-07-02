@@ -140,8 +140,8 @@
 
                                 <td>
                                     Invoice #: 123<br />
-                                    Created: January 1, 2015<br />
-                                    Due: February 1, 2015
+                                    Created: <p id="date_s"></p><br />
+                                    Due: <p id="date_e"></p>
                                 </td>
                             </tr>
                         </table>
@@ -167,18 +167,47 @@
                         </table>
                     </td>
                 </tr>
+            </table>
+            <table id="app_details">
                 <tr class="heading">
                     <td>Item</td>
+                    <td>CPU consumption</td>
+                    <td>Memory consumption</td>
                     <td>Total price</td>
+
                 </tr>
-                {% for app in apps | sort(attribute='name') %}
-                {% if app.state == "deleted" %}
-                <tr class="item">
-                    <td>{{ app.name }}</td>
-                    <td id="bill"></td>
-                </tr>
-                {% endif %}
-                {% endfor %}
+
+                <script type="text/javascript">
+                    var date = new Date();
+                    document.getElementById("date_s").innerHTML = new Date(date.getFullYear(), date.getMonth(), 1);
+                    document.getElementById("date_e").innerHTML = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+                    var date = new Date();
+                    var month_start = Date.UTC(date.getFullYear(), date.getMonth(), 1) / 1000;
+                    var month_end = Date.UTC(date.getFullYear(), date.getMonth() + 1, 0) / 1000;
+                    {% for app in apps | sort(attribute = 'name') %}
+                    if ({{ app.deploy_ts.timestamp() }} >= month_start && {{ app.deploy_ts.timestamp() }} <= month_end) {
+                        var app_url = "/apps/{{app.id}}/consumption?from=" + month_start + "&to=" + month_end + "";
+                        $.ajax(
+                            {
+                                type: 'GET',
+                                url: app_url,
+                                async: false,
+                                dataType: 'json', // type of response data
+                                success: function (data, status, xhr) {   // success callback function
+                                    var cpu_cons = data.cpu_consumption;
+                                    var mem_cons = data.memory_consumption;
+                                    var total_cons = cpu_cons + mem_cons;
+                                    $('#app_details').append('<tr><td>{{ app.name }}</td><td>' + cpu_cons + '</td ><td>' + mem_cons + '</td><td>' + total_cons + '</td></tr>')
+                                },
+                                error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                                    $('#app_details').append('Error: ' + errorMessage);
+                                }
+                            });
+                    }
+                    {% endfor %}
+                </script>
+
 
             </table>
         </div>
@@ -186,10 +215,7 @@
     <div class="w3-container" style="padding: 16px">
         <a href="#" class="w3-button w3-blue">Choose payment method</a>
     </div>
-    <script>
-        const bill_fetch = document.getElementById('bill');
 
-    </script>
 </body>
 <!-- Footer -->
 <footer class="w3-center w3-black w3-padding-64">
