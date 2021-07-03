@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime
 from os import getenv
-from time import time
+import time
 
 import app.business.apps as apps_buzz
 from app import db
@@ -133,14 +133,16 @@ def get_app_usage_billing(app_id: int):
     if from_ >= to:
         raise BadRequest("`from` should be smaller than `to`")
 
-    if from_ > time():
+    if from_ > time.time():
         raise BadRequest("`from` should not be greater than current time")
 
     app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
 
     app_from: int = int(app.deploy_ts.timestamp())
     app_to: int = int(
-        app.delete_ts.timestamp() if app.state == AppStatus.DELETED.value else time()
+        app.delete_ts.timestamp()
+        if app.state == AppStatus.DELETED.value
+        else time.time()
     )
 
     left_boundary = max(app_from, from_)
