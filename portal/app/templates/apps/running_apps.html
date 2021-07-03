@@ -1,6 +1,30 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    html,
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+        font-family: "Raleway", sans-serif
+    }
+
+    tr:hover {
+        background-color: dimgray;
+        cursor: pointer;
+    }
+</style>
+
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
         <a class="ui basic compact button" href="{{ url_for('account.index') }}">
@@ -25,22 +49,59 @@
                         <th class="sorted ascending">Name</th>
                         <th class="sorted ascending">Password</th>
                         <th>URL</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for app in apps | sort(attribute='name') %}
-
+                    {% if app.state != "deleted" %}
                     <tr>
                         <td>{{ app.id }}</td>
                         <td>{{ app.app_type }}</td>
                         <td>{{ app.name }}</td>
                         <td>{{ app.password }}</td>
                         <td>{{ app.url }}</td>
+                        <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <div class="w3-container" style="display: flex; justify-content: flex-end;  padding-top: 10px">
+            <div>
+                <select name="apps" id="select_app">
+                </select>
+            </div>
+            <a id="new_inst" class="w3-button w3-blue">New instance</a>
+        </div>
     </div>
 </div>
+<script type="text/javascript">
+    var app_url = "/apps/supported";
+    $(document).ready(function () {
+        $.ajax(
+            {
+                type: 'GET',
+                url: app_url,
+                async: false,
+                dataType: 'json', // type of response data
+                success: function (data, status, xhr) {   // success callback function
+                    for (supported_app in data.SupportedApps) {
+                        $('#select_app').append('<option value="' + data.SupportedApps[supported_app] + '">' + data.SupportedApps[supported_app] + '</option>')
+
+                    }
+                },
+                error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                    $('#select_app').append('Error: ' + errorMessage);
+                }
+            });
+    });
+    var start_app = document.getElementById("new_inst");
+    var select_app = document.getElementById("select_app");
+    start_app.onclick = function () {
+        start_app.href = "/apps/new/" + select_app.options[select_app.selectedIndex].text;
+    }
+
+</script>
 {% endblock %}
