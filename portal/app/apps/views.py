@@ -1,14 +1,13 @@
 import random
 import string
-from datetime import datetime
 from os import getenv
-from time import time
+import time
 
 import app.business.apps as apps_buzz
 from app import db
 from app.apps.forms import DeployNewApp
 from app.lib.enumeration import AppStatus
-from app.models import AppInstance, User
+from app.models import AppInstance
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
 from flask_login import current_user, login_required
@@ -24,7 +23,15 @@ MEMORY_PRICE = getenv("MEMORY_UNIT_PRICE", 5)
 @login_required
 def index():
     """User apps information page."""
-    return render_template("apps/running_apps.html", apps=current_user.apps)
+    if current_user.is_admin():
+        apps = list(
+            AppInstance.query.filter(AppInstance.state != AppStatus.DELETED.value).all()
+        )
+    else:
+        apps = [
+            app for app in current_user.apps if app.state != AppStatus.DELETED.value
+        ]
+    return render_template("apps/running_apps.html", apps=apps)
 
 
 @apps.route("/new/orangeml", methods=["GET", "POST"])
@@ -56,6 +63,7 @@ def new_orangeml():
             vcpu_limit,
             memory_limit,
             app_type=apps_buzz.SupportedApps.ORANGE_ML,
+            app_owner=app_instance.owner,
             app_id=app_instance.id,
             password=password,
         )
@@ -72,19 +80,22 @@ def new_orangeml():
 @login_required
 def delete_app_instance(app_id):
     """Delete an application instance"""
-    user_apps = User.query.filter_by(id=current_user.id).first_or_404().apps
-    for app in user_apps:
-        if app.id == app_id:
-            apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
-            app.state = AppStatus.DELETED.value
-            app.delete_ts = datetime.now()
-            db.session.commit()
-            flash(
-                f"Successfully deleted {app.app_type} App with id {app.id}." "success",
-            )
-            break
+    user_apps = current_user.apps
+    if current_user.is_admin():
+        app = AppInstance.query.filter_by(id=app_id).first_or_404()
+        apps_buzz.remove_app(app)
     else:
-        abort(403)
+        for app in user_apps:
+            if app.id == app_id:
+                apps_buzz.remove_app(app)
+                flash(
+                    f"Successfully deleted {app.app_type} App with id {app.id}."
+                    "success",
+                )
+                break
+        else:
+            abort(403)
+    db.session.commit()
     return redirect(url_for("account.index"))
 
 
@@ -127,14 +138,16 @@ def get_app_usage_billing(app_id: int):
     if from_ >= to:
         raise BadRequest("`from` should be smaller than `to`")
 
-    if from_ > time():
+    if from_ > time.time():
         raise BadRequest("`from` should not be greater than current time")
 
     app = AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
 
     app_from: int = int(app.deploy_ts.timestamp())
     app_to: int = int(
-        app.delete_ts.timestamp() if app.state == AppStatus.DELETED.value else time()
+        app.delete_ts.timestamp()
+        if app.state == AppStatus.DELETED.value
+        else time.time()
     )
 
     left_boundary = max(app_from, from_)

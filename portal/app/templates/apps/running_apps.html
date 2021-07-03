@@ -55,12 +55,14 @@
                 <tbody>
                     {% for app in apps | sort(attribute='name') %}
                     {% if app.state != "deleted" %}
-                    <td>{{ app.id }}</td>
-                    <td>{{ app.app_type }}</td>
-                    <td>{{ app.name }}</td>
-                    <td>{{ app.password }}</td>
-                    <td>{{ app.url }}</td>
-                    <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
+                    <tr>
+                        <td>{{ app.id }}</td>
+                        <td>{{ app.app_type }}</td>
+                        <td>{{ app.name }}</td>
+                        <td>{{ app.password }}</td>
+                        <td>{{ app.url }}</td>
+                        <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
+                    </tr>
                     {% endif %}
                     {% endfor %}
                 </tbody>

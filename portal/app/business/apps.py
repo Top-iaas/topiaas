@@ -1,8 +1,8 @@
 from app.lib.enumeration import SupportedApps
 from app.business import k8s
 from flask import abort, Response
-from flask_login import current_user
 from app.lib.enumeration import AppStatus
+from datetime import datetime
 
 
 def list_supported_apps():
@@ -24,12 +24,12 @@ def validate_app_request(user, vcpu_limit, memory_limit):
         )
 
 
-def _get_app_name(app_type, app_id):
-    return f"{app_type}-{current_user.id}-{app_id}"
+def _get_app_name(app_type, app_owner_id, app_id):
+    return f"{app_type}-{app_owner_id}-{app_id}"
 
 
-def deploy_app(vcpu_limit, memory_limit, app_type, app_id, password):
-    name = _get_app_name(app_type, app_id)
+def deploy_app(vcpu_limit, memory_limit, app_type, app_owner, app_id, password):
+    name = _get_app_name(app_type, app_owner, app_id)
     if app_type == SupportedApps.ORANGE_ML:
         return k8s.create_orangeml_instance(
             name=name,
@@ -39,6 +39,15 @@ def deploy_app(vcpu_limit, memory_limit, app_type, app_id, password):
         )
 
 
-def remove_app(app_type, app_id):
-    name = _get_app_name(app_type, app_id)
-    return k8s.delete_app_instance(name)
+def remove_app(app):
+    if app.state != AppStatus.DEPLOYED.value:
+        abort(
+            Response(
+                "App is not in state DEPLOYED",
+                status=400,
+            )
+        )
+    name = _get_app_name(app.app_type, app.owner, app.id)
+    k8s.delete_app_instance(name)
+    app.state = AppStatus.DELETED.value
+    app.delete_ts = datetime.now()
