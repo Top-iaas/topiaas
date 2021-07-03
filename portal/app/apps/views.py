@@ -8,7 +8,7 @@ import app.business.apps as apps_buzz
 from app import db
 from app.apps.forms import DeployNewApp
 from app.lib.enumeration import AppStatus
-from app.models import AppInstance, User
+from app.models import AppInstance
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
 from flask_login import current_user, login_required
@@ -72,19 +72,26 @@ def new_orangeml():
 @login_required
 def delete_app_instance(app_id):
     """Delete an application instance"""
-    user_apps = User.query.filter_by(id=current_user.id).first_or_404().apps
-    for app in user_apps:
-        if app.id == app_id:
-            apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
-            app.state = AppStatus.DELETED.value
-            app.delete_ts = datetime.now()
-            db.session.commit()
-            flash(
-                f"Successfully deleted {app.app_type} App with id {app.id}." "success",
-            )
-            break
+    user_apps = current_user.apps
+    if current_user.is_admin():
+        app = AppInstance.query.filter_by(id=app_id).first_or_404()
+        app.state = AppStatus.DELETED.value
+        app.delete_ts = datetime.now()
+        db.session.commit()
     else:
-        abort(403)
+        for app in user_apps:
+            if app.id == app_id:
+                apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
+                app.state = AppStatus.DELETED.value
+                app.delete_ts = datetime.now()
+                db.session.commit()
+                flash(
+                    f"Successfully deleted {app.app_type} App with id {app.id}."
+                    "success",
+                )
+                break
+        else:
+            abort(403)
     return redirect(url_for("account.index"))
 
 
