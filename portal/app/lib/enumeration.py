@@ -59,3 +59,8 @@ class IntEnum(_IntEnum):
 
 class SupportedApps(StringEnum):
     ORANGE_ML = "orangeml"
+
+
+class AppStatus(StringEnum):
+    DEPLOYED = "deployed"
+    DELETED = "deleted"

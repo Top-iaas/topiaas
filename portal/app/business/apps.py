@@ -2,6 +2,7 @@ from app.lib.enumeration import SupportedApps
 from app.business import k8s
 from flask import abort, Response
 from flask_login import current_user
+from app.lib.enumeration import AppStatus
 
 
 def list_supported_apps():
@@ -9,8 +10,9 @@ def list_supported_apps():
 
 
 def validate_app_request(user, vcpu_limit, memory_limit):
-    total_user_cpu_usage = sum((app.vcpu_limit for app in user.apps))
-    total_user_memory_usage = sum((app.memory_limit for app in user.apps))
+    consuming_apps = [app for app in user.apps if app.state != AppStatus.DELETED.value]
+    total_user_cpu_usage = sum((app.vcpu_limit for app in consuming_apps))
+    total_user_memory_usage = sum((app.memory_limit for app in consuming_apps))
     free_cpu = user.vcpu_limit - total_user_cpu_usage
     free_memory = user.memory_limit - total_user_memory_usage
     if free_cpu < vcpu_limit or free_memory < memory_limit:
