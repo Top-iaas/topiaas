@@ -30,11 +30,13 @@
                 <tbody>
                     {% for app in apps | sort(attribute='name') %}
 
-                    <td>{{ app.id }}</td>
-                    <td>{{ app.app_type }}</td>
-                    <td>{{ app.name }}</td>
-                    <td>{{ app.password }}</td>
-                    <td>{{ app.url }}</td>
+                    <tr>
+                        <td>{{ app.id }}</td>
+                        <td>{{ app.app_type }}</td>
+                        <td>{{ app.name }}</td>
+                        <td>{{ app.password }}</td>
+                        <td>{{ app.url }}</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

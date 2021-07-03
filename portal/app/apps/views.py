@@ -1,6 +1,5 @@
 import random
 import string
-from datetime import datetime
 from os import getenv
 import time
 
@@ -24,7 +23,15 @@ MEMORY_PRICE = getenv("MEMORY_UNIT_PRICE", 5)
 @login_required
 def index():
     """User apps information page."""
-    return render_template("apps/running_apps.html", apps=current_user.apps)
+    if current_user.is_admin():
+        apps = list(
+            AppInstance.query.filter(AppInstance.state != AppStatus.DELETED.value).all()
+        )
+    else:
+        apps = [
+            app for app in current_user.apps if app.state != AppStatus.DELETED.value
+        ]
+    return render_template("apps/running_apps.html", apps=apps)
 
 
 @apps.route("/new/orangeml", methods=["GET", "POST"])
@@ -56,6 +63,7 @@ def new_orangeml():
             vcpu_limit,
             memory_limit,
             app_type=apps_buzz.SupportedApps.ORANGE_ML,
+            app_owner=app_instance.owner,
             app_id=app_instance.id,
             password=password,
         )
@@ -75,16 +83,11 @@ def delete_app_instance(app_id):
     user_apps = current_user.apps
     if current_user.is_admin():
         app = AppInstance.query.filter_by(id=app_id).first_or_404()
-        app.state = AppStatus.DELETED.value
-        app.delete_ts = datetime.now()
-        db.session.commit()
+        apps_buzz.remove_app(app)
     else:
         for app in user_apps:
             if app.id == app_id:
-                apps_buzz.remove_app(app_type=app.app_type, app_id=app.id)
-                app.state = AppStatus.DELETED.value
-                app.delete_ts = datetime.now()
-                db.session.commit()
+                apps_buzz.remove_app(app)
                 flash(
                     f"Successfully deleted {app.app_type} App with id {app.id}."
                     "success",
@@ -92,6 +95,7 @@ def delete_app_instance(app_id):
                 break
         else:
             abort(403)
+    db.session.commit()
     return redirect(url_for("account.index"))
 
 
