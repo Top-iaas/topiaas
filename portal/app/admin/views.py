@@ -32,14 +32,6 @@ def index():
     return render_template("admin/index.html")
 
 
-@admin.route("/orangeml")
-@login_required
-@admin_required
-def orangeml_instance():
-    """Admin dashboard page."""
-    return redirect("https://topiaas.ml/orangeml-0/vnc.html")
-
-
 @admin.route("/new-user", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -163,6 +155,18 @@ def change_account_type(user_id):
             "form-success",
         )
     return render_template("admin/manage_user.html", user=user, form=form)
+
+
+@admin.route("/user/<int:user_id>")
+@admin.route("/user/<int:user_id>/manage_instances")
+@login_required
+@admin_required
+def manage_user_instances(user_id):
+    """View a user's profile."""
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    return render_template("apps/manage_user_instances.html", user=user)
 
 
 @admin.route("/user/<int:user_id>/delete")
