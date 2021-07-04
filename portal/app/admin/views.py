@@ -157,18 +157,6 @@ def change_account_type(user_id):
     return render_template("admin/manage_user.html", user=user, form=form)
 
 
-@admin.route("/user/<int:user_id>")
-@admin.route("/user/<int:user_id>/manage_instances")
-@login_required
-@admin_required
-def manage_user_instances(user_id):
-    """View a user's profile."""
-    user = User.query.filter_by(id=user_id).first()
-    if user is None:
-        abort(404)
-    return render_template("apps/manage_user_instances.html", user=user)
-
-
 @admin.route("/user/<int:user_id>/delete")
 @login_required
 @admin_required
