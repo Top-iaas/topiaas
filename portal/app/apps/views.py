@@ -31,7 +31,9 @@ def index():
         apps = [
             app for app in current_user.apps if app.state != AppStatus.DELETED.value
         ]
-    return render_template("apps/running_apps.html", apps=apps)
+    return render_template(
+        "apps/running_apps.html", apps=apps, is_admin=current_user.is_admin()
+    )
 
 
 @apps.route("/new/orangeml", methods=["GET", "POST"])

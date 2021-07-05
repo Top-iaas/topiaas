@@ -27,54 +27,66 @@
 
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
-        <a class="ui basic compact button" href="{{ url_for('account.index') }}">
-            <i class="caret left icon"></i>
-            Back to dashboard
-        </a>
-        <h2 class="ui header">
-            Running Apps
-            <div class="sub header">
-                View and manage your apps
-            </div>
-        </h2>
+        {% if is_admin %}
+        <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+            {% else %}
+            <a class="ui basic compact button" href="{{ url_for('account.index') }}">
+                {% endif%}
+                <i class="caret left icon"></i>
+                Back to dashboard
+            </a>
+            <h2 class="ui header">
+                Running Apps
+                <div class="sub header">
+                    View and manage your apps
+                </div>
+            </h2>
 
-        {# Use overflow-x: scroll so that mobile views don't freak out
-        # when the table is too wide #}
-        <div style="overflow-x: scroll;">
-            <table class="ui searchable sortable unstackable selectable celled table">
-                <thead>
-                    <tr>
-                        <th class="sorted ascending">Id</th>
-                        <th class="sorted ascending">Class</th>
-                        <th class="sorted ascending">Name</th>
-                        <th class="sorted ascending">Password</th>
-                        <th>URL</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in apps | sort(attribute='name') %}
-                    {% if app.state != "deleted" %}
-                    <tr>
-                        <td>{{ app.id }}</td>
-                        <td>{{ app.app_type }}</td>
-                        <td>{{ app.name }}</td>
-                        <td>{{ app.password }}</td>
-                        <td>{{ app.url }}</td>
-                        <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="w3-container" style="display: flex; justify-content: flex-end;  padding-top: 10px">
-            <div>
-                <select name="apps" id="select_app">
-                </select>
+            {# Use overflow-x: scroll so that mobile views don't freak out
+            # when the table is too wide #}
+            <div style="overflow-x: scroll;">
+                <table class="ui searchable sortable unstackable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th class="sorted ascending">Id</th>
+                            {% if is_admin %}
+                            <th class="sorted ascending">Owner</th>
+                            {% endif %}
+                            <th class="sorted ascending">Class</th>
+                            <th class="sorted ascending">Name</th>
+                            <th class="sorted ascending">Password</th>
+                            <th>URL</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in apps | sort(attribute='name') %}
+                        {% if app.state != "deleted" %}
+                        <tr>
+                            <td>{{ app.id }}</td>
+                            {% if is_admin %}
+                            <td>{{ app.users }}</td>
+                            {% endif %}
+                            <td>{{ app.app_type }}</td>
+                            <td>{{ app.name }}</td>
+                            <td>{{ app.password }}</td>
+                            <td>{{ app.url }}</td>
+                            <td><a href="/apps/delete/{{ app.id }}"><i class="fa fa-trash w3-xlarge"></i></a></td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <a id="new_inst" class="w3-button w3-blue">New instance</a>
-        </div>
+            {% if not is_admin%}
+            <div class="w3-container" style="display: flex; justify-content: flex-end;  padding-top: 10px">
+                <div>
+                    <select name="apps" id="select_app">
+                    </select>
+                </div>
+                <a id="new_inst" class="w3-button w3-blue">New instance</a>
+            </div>
+            {% endif %}
     </div>
 </div>
 <script type="text/javascript">
