@@ -39,5 +39,17 @@ spec:
                 secretKeyRef:
                   name: postgres-postgresql-ha-postgresql
                   key: postgresql-password
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-creds
+                  key: AccessKey
+            - name: S3_ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: s3-creds
+                  key: AccessSecret
+            - name: S3_END_POINT
+              value: "topiaas.ml:9000"
             - name: SECRET_KEY
               value: sercet_key #TODO: change

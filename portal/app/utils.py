@@ -2,6 +2,15 @@ from flask import url_for
 from wtforms.fields import Field
 from wtforms.widgets import HiddenInput
 from wtforms.compat import text_type
+from app.models.user import User
+from minio import Minio
+import os
+
+
+minio_endpoint = os.environ.get("S3_ENDPOINT")
+access_key = os.environ.get("S3_ACCESS_KEY")
+access_secret = os.environ.get("S3_ACCESS_SECRET")
+minio_cl = Minio(minio_endpoint, access_key, access_secret, secure=False)
 
 
 def register_template_utils(app):
@@ -34,7 +43,7 @@ class CustomSelectField(Field):
         multiple=False,
         choices=[],
         allow_custom=True,
-        **kwargs
+        **kwargs,
     ):
         super(CustomSelectField, self).__init__(label, validators, **kwargs)
         self.multiple = multiple
@@ -50,3 +59,23 @@ class CustomSelectField(Field):
             self.raw_data = [valuelist[1]]
         else:
             self.data = ""
+
+
+def get_user_bucket(user: User):
+    return f"user.{user.id}"
+
+
+def touch_bucket(bucket_name: str):
+    if not minio_cl.bucket_exists(bucket_name):
+        minio_cl.make_bucket(bucket_name)
+
+
+def s3_upload(user: User, destination: str, file_path: str):
+    bucket = get_user_bucket(user)
+    touch_bucket(bucket_name=bucket)
+    minio_cl.fput_object(bucket, destination, file_path)
+
+
+def s3_remove(user: User, filename: str):
+    bucket = get_user_bucket(user)
+    minio_cl.remove_object(bucket, filename)

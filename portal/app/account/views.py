@@ -1,11 +1,4 @@
-from flask import (
-    Blueprint,
-    flash,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
 from flask_login import (
     current_user,
     login_required,
@@ -25,9 +18,15 @@ from app.account.forms import (
     ResetPasswordForm,
     ChangeCapacityLimits,
 )
+from app.apps.forms import S3FileUpload
+from app.utils import s3_upload, s3_remove
 from app.email import send_email
 from app.models import User
 from app.business import account as account_buzz
+from werkzeug.utils import secure_filename
+from werkzeug import Response
+from minio.error import MinioException, S3Error, ServerError
+import os
 
 account = Blueprint("account", __name__)
 
@@ -345,3 +344,62 @@ def billing():
 def demo(host, app_instance_id):
     """Instance of orangeML"""
     return render_template("account/demo.html", app_instance=app_instance_id)
+
+
+@account.route("/uploadFileToS3", methods=["GET", "POST"])
+def upload_file_to_s3():
+    form = S3FileUpload()
+    if form.validate_on_submit():
+        f = form.file.data
+        filename = secure_filename(f.filename)
+        file_path = os.path.join("/tmp", filename)
+        f.save(file_path)
+        try:
+            s3_upload(current_user, filename, file_path)
+        except (MinioException, S3Error, ServerError):
+            abort(
+                Response(
+                    "Error while uploading the file to remote storage",
+                    status=503,
+                )
+            )
+        os.remove(file_path)
+        if filename not in current_user.storage_files:
+            current_user.storage_files.append(filename)
+        db.session.add(current_user)
+        db.session.commit()
+        return redirect(url_for("account.storage_files"))
+    return render_template("account/upload_file.html", form=form)
+
+
+@account.route("/removeStorageFile/<string:filename>", methods=["GET", "POST"])
+def remove_file_in_s3(filename):
+    """Delete a file from the S3 storage"""
+    if filename not in current_user.storage_files:
+        abort(
+            Response(
+                f"can not find file with name {filename}",
+                status=404,
+            )
+        )
+    try:
+        s3_remove(current_user, filename)
+    except (MinioException, S3Error, ServerError):
+        abort(
+            Response(
+                "Could not remove file from remote storage",
+                status=503,
+            )
+        )
+    current_user.storage_files.remove(filename)
+    db.session.add(current_user)
+    db.session.commit()
+    return redirect(url_for("account.storage_files"))
+
+
+@account.route("/storageFiles", methods=["GET", "POST"])
+@login_required
+def storage_files():
+    return render_template(
+        "account/storage_files.html", storage_files=current_user.storage_files
+    )

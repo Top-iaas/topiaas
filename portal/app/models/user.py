@@ -3,9 +3,35 @@ from flask_login import AnonymousUserMixin, UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from sqlalchemy import ARRAY
 from .. import db, login_manager
 from .app import app_user_association
+
+from sqlalchemy.ext.mutable import Mutable
+
+
+class MutableList(Mutable, list):
+    def append(self, value):
+        list.append(self, value)
+        self.changed()
+
+    def remove(self, value):
+        list.remove(self, value)
+        self.changed()
+
+    def pop(self, index=0):
+        value = list.pop(self, index)
+        self.changed()
+        return value
+
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
 
 
 class Permission:
@@ -60,6 +86,9 @@ class User(UserMixin, db.Model):
     )
     vcpu_limit = db.Column(db.Integer, default=0)
     memory_limit = db.Column(db.Integer, default=0)
+    storage_files = db.Column(
+        MutableList.as_mutable(ARRAY(db.String(64))), server_default="{}"
+    )
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
