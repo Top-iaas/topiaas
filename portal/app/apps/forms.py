@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms.fields import IntegerField, StringField, SubmitField
 from wtforms.validators import InputRequired, NumberRange
+from flask_wtf.file import FileField, FileRequired
 
 
 class DeployNewApp(FlaskForm):
@@ -28,3 +29,9 @@ class AppFileUpload(FlaskForm):
 class AppFileDownload(FlaskForm):
     app_path = StringField("App path to get file from", validators=[InputRequired()])
     submit = SubmitField("Download")
+
+
+class S3FileUpload(FlaskForm):
+    file = FileField("Upload File", validators=[FileRequired()])
+    submit = SubmitField("Upload")
+    # app_path = StringField("Path in App instance", validators=[InputRequired()])
