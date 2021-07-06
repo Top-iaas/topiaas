@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: inkscape-service-0
+spec:
+  selector:
+    app: inkscape-0
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
