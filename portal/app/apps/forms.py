@@ -23,3 +23,8 @@ class AppFileUpload(FlaskForm):
     app_path = StringField("App path to save file at", validators=[InputRequired()])
     file = FileField("Upload File", validators=[FileRequired()])
     submit = SubmitField("Upload")
+
+
+class AppFileDownload(FlaskForm):
+    app_path = StringField("App path to get file from", validators=[InputRequired()])
+    submit = SubmitField("Download")

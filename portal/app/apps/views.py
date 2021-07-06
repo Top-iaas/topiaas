@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 
 import app.business.apps as apps_buzz
 from app import db
-from app.apps.forms import AppFileUpload, DeployNewApp
+from app.apps.forms import AppFileDownload, AppFileUpload, DeployNewApp
 from app.business.k8s import get_orange_ml_pod_name
 from app.lib.enumeration import AppStatus
 from app.models import AppInstance
@@ -177,38 +177,36 @@ def get_app_usage_billing(app_id: int):
     return jsonify(usage)
 
 
-@apps.route("/<int:app_id>/download", methods=["GET"])
+@apps.route("/<app_instance>/download", methods=["GET", "POST"])
 @login_required
-def download_app_file(app_id: int):
-    path = request.args.get("path")
-    if path is None:
-        raise BadRequest("path query arg missing")
+def download_app_file(app_instance: str):
 
-    pod_name = get_orange_ml_pod_name(
-        apps_buzz.get_app_name(
-            AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
+    form = AppFileDownload()
+    if form.validate_on_submit():
+        path = form.app_path.data
+
+        pod_name = get_orange_ml_pod_name("-".join(app_instance.split("-")[:-1]))
+
+        temp_file = NamedTemporaryFile("r+b")
+
+        p = subprocess.run(
+            ["kubectl", "cp", f"{pod_name}:{path}", f"{temp_file.name}"],
+            capture_output=True,
         )
-    )
+        if p.stdout:
+            raise BadRequest(p.stdout.decode())
 
-    temp_file = NamedTemporaryFile("r+b")
+        if p.stderr:
+            raise BadRequest(p.stderr.decode())
 
-    p = subprocess.run(
-        ["kubectl", "cp", f"{pod_name}:{path}", f"{temp_file.name}"],
-        capture_output=True,
-    )
-    if p.stdout:
-        raise BadRequest(p.stdout.decode())
-
-    if p.stderr:
-        raise BadRequest(p.stderr.decode())
-
-    return Response(
-        temp_file,
-        status=200,
-        headers={
-            "Content-Disposition": f"attachment; filename={basename(path)}",
-        },
-    )
+        return Response(
+            temp_file,
+            status=200,
+            headers={
+                "Content-Disposition": f"attachment; filename={basename(path)}",
+            },
+        )
+    return render_template("apps/app_file_download.html", form=form)
 
 
 @apps.route("/<app_instance>/upload", methods=["GET", "POST"])
