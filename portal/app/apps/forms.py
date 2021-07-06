@@ -21,19 +21,25 @@ class DeployNewApp(FlaskForm):
 
 
 class AppFileUpload(FlaskForm):
-    app_path = StringField("App path to save file at", validators=[InputRequired()])
+    app_path = StringField(
+        "App path of the form: home/filename", validators=[InputRequired()]
+    )
     file = FileField("Upload File", validators=[FileRequired()])
     submit = SubmitField("Upload")
 
 
 class APPS3FileUpload(FlaskForm):
-    app_path = StringField("App path to save file at", validators=[InputRequired()])
+    app_path = StringField(
+        "App path of the form: home/filename", validators=[InputRequired()]
+    )
     storage_file = StringField("Name of file in storage", validators=[InputRequired()])
     submit = SubmitField("Upload")
 
 
 class AppFileDownload(FlaskForm):
-    app_path = StringField("App path to get file from", validators=[InputRequired()])
+    app_path = StringField(
+        "App path of form: home/filename", validators=[InputRequired()]
+    )
     submit = SubmitField("Download")
 
 

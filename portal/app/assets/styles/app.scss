@@ -5,7 +5,7 @@ $small-monitor-breakpoint: 1200px;
 
 // General nav
 nav {
-    margin-bottom: 40px !important;
+    margin-bottom: 0px !important;
 }
 
 // Desktop nav
@@ -16,14 +16,14 @@ nav {
 // Mobile nav
 nav .mobile.only.row {
     .ui.vertical.menu {
-        margin-top: 40px;
+        margin-top: 0px;
         display: none;
     }
 }
 
 // Flashes
 .flashes > .ui.message:last-of-type {
-    margin-bottom: 2rem;
+    margin-bottom: 0rem;
 }
 
 // Tables
