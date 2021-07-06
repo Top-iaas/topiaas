@@ -71,6 +71,7 @@ def invite_user():
         invite_link = url_for(
             "account.join_from_invite", user_id=user.id, token=token, _external=True
         )
+        user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=user.email,

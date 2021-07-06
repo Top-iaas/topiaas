@@ -67,6 +67,7 @@ def register():
         db.session.commit()
         token = user.generate_confirmation_token()
         confirm_link = url_for("account.confirm", token=token, _external=True)
+        user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=user.email,
@@ -107,6 +108,7 @@ def reset_password_request():
         if user:
             token = user.generate_password_reset_token()
             reset_link = url_for("account.reset_password", token=token, _external=True)
+            user.__dict__.pop("storage_files")
             get_queue().enqueue(
                 send_email,
                 recipient=user.email,
@@ -173,6 +175,8 @@ def change_email_request():
             change_email_link = url_for(
                 "account.change_email", token=token, _external=True
             )
+            user = current_user._get_current_object()
+            user.__dict__.pop("storage_files")
             get_queue().enqueue(
                 send_email,
                 recipient=new_email,
@@ -180,7 +184,7 @@ def change_email_request():
                 template="account/email/change_email",
                 # current_user is a LocalProxy, we want the underlying user
                 # object
-                user=current_user._get_current_object(),
+                user=user,
                 change_email_link=change_email_link,
             )
             flash(
@@ -223,13 +227,15 @@ def confirm_request():
     """Respond to new user's request to confirm their account."""
     token = current_user.generate_confirmation_token()
     confirm_link = url_for("account.confirm", token=token, _external=True)
+    user = current_user._get_current_object()
+    user.__dict__.pop("storage_files")
     get_queue().enqueue(
         send_email,
         recipient=current_user.email,
         subject="Confirm Your Account",
         template="account/email/confirm",
         # current_user is a LocalProxy, we want the underlying user object
-        user=current_user._get_current_object(),
+        user=user,
         confirm_link=confirm_link,
     )
     flash(
@@ -294,6 +300,7 @@ def join_from_invite(user_id, token):
         invite_link = url_for(
             "account.join_from_invite", user_id=user_id, token=token, _external=True
         )
+        new_user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=new_user.email,
