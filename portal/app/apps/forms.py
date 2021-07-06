@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms.fields import StringField, SubmitField, IntegerField
+from flask_wtf.file import FileField, FileRequired
+from wtforms.fields import IntegerField, StringField, SubmitField
 from wtforms.validators import InputRequired, NumberRange
 
 
@@ -16,3 +17,9 @@ class DeployNewApp(FlaskForm):
         "memory Capacity", validators=[InputRequired(), NumberRange(min=512)]
     )
     submit = SubmitField("Deploy")
+
+
+class AppFileUpload(FlaskForm):
+    app_path = StringField("App path to save file at", validators=[InputRequired()])
+    file = FileField("Upload File", validators=[FileRequired()])
+    submit = SubmitField("Upload")

@@ -1,15 +1,20 @@
 import random
 import string
-from os import getenv
+import subprocess
 import time
+from os import getenv
+from os.path import basename
+from tempfile import NamedTemporaryFile
 
 import app.business.apps as apps_buzz
 from app import db
-from app.apps.forms import DeployNewApp
+from app.apps.forms import AppFileUpload, DeployNewApp
+from app.business.k8s import get_orange_ml_pod_name
 from app.lib.enumeration import AppStatus
 from app.models import AppInstance
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
+from flask.wrappers import Response
 from flask_login import current_user, login_required
 from werkzeug.exceptions import BadRequest
 
@@ -62,9 +67,7 @@ def new_orangeml():
         app_url = apps_buzz.deploy_app(
             vcpu_limit,
             memory_limit,
-            app_type=apps_buzz.SupportedApps.ORANGE_ML,
-            app_owner=app_instance.owner,
-            app_id=app_instance.id,
+            app=app_instance,
             password=password,
         )
         app_instance.url = app_url
@@ -172,3 +175,73 @@ def get_app_usage_billing(app_id: int):
         ),
     }
     return jsonify(usage)
+
+
+@apps.route("/<int:app_id>/download", methods=["GET"])
+@login_required
+def download_app_file(app_id: int):
+    path = request.args.get("path")
+    if path is None:
+        raise BadRequest("path query arg missing")
+
+    pod_name = get_orange_ml_pod_name(
+        apps_buzz.get_app_name(
+            AppInstance.query.filter_by(owner=current_user.id, id=app_id).first_or_404()
+        )
+    )
+
+    temp_file = NamedTemporaryFile("r+b")
+
+    p = subprocess.run(
+        ["kubectl", "cp", f"{pod_name}:{path}", f"{temp_file.name}"],
+        capture_output=True,
+    )
+    if p.stdout:
+        raise BadRequest(p.stdout.decode())
+
+    if p.stderr:
+        raise BadRequest(p.stderr.decode())
+
+    return Response(
+        temp_file,
+        status=200,
+        headers={
+            "Content-Disposition": f"attachment; filename={basename(path)}",
+        },
+    )
+
+
+@apps.route("/<app_instance>/upload", methods=["GET", "POST"])
+@login_required
+def upload_app_file(app_instance: str):
+
+    form = AppFileUpload()
+    if form.validate_on_submit():
+
+        file = form.file.data
+        with NamedTemporaryFile("r+b") as temp_file:
+
+            file.save(temp_file.name)
+
+            pod_name = get_orange_ml_pod_name("-".join(app_instance.split("-")[:-1]))
+
+            p = subprocess.run(
+                [
+                    "kubectl",
+                    "cp",
+                    f"{temp_file.name}",
+                    f"{pod_name}:{form.app_path.data}",
+                ],
+                capture_output=True,
+            )
+        if p.stdout:
+            raise BadRequest(p.stdout.decode())
+
+        if p.stderr:
+            raise BadRequest(p.stderr.decode())
+
+        return redirect(
+            url_for("account.demo", app_instance_id=app_instance, host="topiaas.ml")
+        )
+
+    return render_template("apps/app_file_upload.html", form=form)

@@ -1,6 +1,7 @@
-import uuid
-from kubernetes import client, config, watch
 import time
+import uuid
+
+from kubernetes import client, config
 
 try:
     config.load_incluster_config()
@@ -137,3 +138,13 @@ def delete_app_instance(name):
     core_v1_api.delete_namespaced_service(name=name, namespace="default")
     networking_v1_beta1_api.delete_namespaced_ingress(name=name, namespace="default")
     return True
+
+
+def list_deployment_pods(deployment_name: str):
+    return core_v1_api.list_namespaced_pod(
+        "default", label_selector=f"app={deployment_name}"
+    )
+
+
+def get_orange_ml_pod_name(app_name: str):
+    return list_deployment_pods(app_name).items[0].metadata.name
