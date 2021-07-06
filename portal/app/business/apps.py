@@ -24,13 +24,13 @@ def validate_app_request(user, vcpu_limit, memory_limit):
         )
 
 
-def _get_app_name(app_type, app_owner_id, app_id):
-    return f"{app_type}-{app_owner_id}-{app_id}"
+def get_app_name(app):
+    return f"{app.app_type}-{app.owner}-{app.id}"
 
 
-def deploy_app(vcpu_limit, memory_limit, app_type, app_owner, app_id, password):
-    name = _get_app_name(app_type, app_owner, app_id)
-    if app_type == SupportedApps.ORANGE_ML:
+def deploy_app(vcpu_limit, memory_limit, app, password):
+    name = get_app_name(app)
+    if app.app_type == SupportedApps.ORANGE_ML:
         return k8s.create_orangeml_instance(
             name=name,
             cpu_limit=vcpu_limit,
@@ -47,7 +47,7 @@ def remove_app(app):
                 status=400,
             )
         )
-    name = _get_app_name(app.app_type, app.owner, app.id)
+    name = get_app_name(app)
     k8s.delete_app_instance(name)
     app.state = AppStatus.DELETED.value
     app.delete_ts = datetime.now()

@@ -2,7 +2,7 @@ FROM python:3.8-alpine
 
 
 # Packages required for psycopg2
-RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev curl
 
 # We copy just the requirements.txt first to leverage Docker cache
 COPY ./requirements.txt /app/requirements.txt
@@ -11,6 +11,9 @@ WORKDIR /app
 RUN pip3 install -r requirements.txt 
 ENV PYTHONIOENCODING=UTF-8
 RUN pip3 install sqlalchemy_utils flask_dance flask_caching python-gitlab
+
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 COPY . /app
 
