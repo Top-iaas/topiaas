@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inkscape-0
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: "topiaas.ml"
+    http:
+      paths:
+      - backend:
+          service:
+            name: inkscape-service-0
+            port:
+              number: 80
+        path: /inkscape-test-0/websockify
+        pathType: Prefix
+  tls:
+  - hosts:
+    -  "topiaas.ml"
+    secretName: topiaas-ml-tls
