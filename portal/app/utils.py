@@ -79,3 +79,8 @@ def s3_upload(user: User, destination: str, file_path: str):
 def s3_remove(user: User, filename: str):
     bucket = get_user_bucket(user)
     minio_cl.remove_object(bucket, filename)
+
+
+def s3_download(user: User, filename: str, filepath: str):
+    bucket = get_user_bucket(user)
+    minio_cl.fget_object(bucket, filename, filepath)

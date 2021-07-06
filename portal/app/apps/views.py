@@ -2,16 +2,16 @@ import random
 import string
 import subprocess
 import time
-from os import getenv
-from os.path import basename
+import os
 from tempfile import NamedTemporaryFile
 
 import app.business.apps as apps_buzz
 from app import db
-from app.apps.forms import AppFileDownload, AppFileUpload, DeployNewApp
+from app.apps.forms import AppFileDownload, AppFileUpload, DeployNewApp, APPS3FileUpload
 from app.business.k8s import get_orange_ml_pod_name
 from app.lib.enumeration import AppStatus
 from app.models import AppInstance
+from app.utils import s3_download
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
 from flask.wrappers import Response
@@ -20,8 +20,8 @@ from werkzeug.exceptions import BadRequest
 
 apps = Blueprint("apps", __name__)
 
-CPU_PRICE = getenv("CPU_UNIT_PRICE", 2)
-MEMORY_PRICE = getenv("MEMORY_UNIT_PRICE", 5)
+CPU_PRICE = os.getenv("CPU_UNIT_PRICE", 2)
+MEMORY_PRICE = os.getenv("MEMORY_UNIT_PRICE", 5)
 
 
 @apps.route("/")
@@ -205,7 +205,7 @@ def download_app_file(app_instance: str):
             temp_file,
             status=200,
             headers={
-                "Content-Disposition": f"attachment; filename={basename(path)}",
+                "Content-Disposition": f"attachment; filename={os.path.basename(path)}",
             },
         )
     return render_template("apps/app_file_download.html", form=form)
@@ -245,3 +245,43 @@ def upload_app_file(app_instance: str):
         )
 
     return render_template("apps/app_file_upload.html", form=form)
+
+
+@apps.route("/<app_instance>/S3FileUpload", methods=["GET", "POST"])
+@login_required
+def s3_file_upload(app_instance: str):
+    form = APPS3FileUpload()
+    if form.validate_on_submit():
+        storage_file_name = form.storage_file.data
+        if storage_file_name not in current_user.storage_files:
+            abort(
+                Response(
+                    f"can not find file with name {storage_file_name}",
+                    status=404,
+                )
+            )
+        user_prefix = f"user.{current_user.id}."
+        file_path = f"/tmp/{user_prefix}{storage_file_name}"
+        s3_download(current_user, storage_file_name, file_path)
+        pod_name = get_orange_ml_pod_name("-".join(app_instance.split("-")[:-1]))
+        p = subprocess.run(
+            [
+                "kubectl",
+                "cp",
+                file_path,
+                f"{pod_name}:{form.app_path.data}",
+            ],
+            capture_output=True,
+        )
+        os.remove(file_path)
+        if p.stdout:
+            raise BadRequest(p.stdout.decode())
+
+        if p.stderr:
+            raise BadRequest(p.stderr.decode())
+
+        return redirect(
+            url_for("account.demo", app_instance_id=app_instance, host="topiaas.ml")
+        )
+
+    return render_template("apps/app_s3_file_upload.html", form=form)
