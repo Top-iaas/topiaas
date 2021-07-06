@@ -1,6 +1,26 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    html,
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+        font-family: "Raleway", sans-serif
+    }
+
+    tr:hover {
+        background-color: dimgray;
+        cursor: pointer;
+    }
+</style>
 <div class="ui stackable centered grid container">
     <div class="twelve wide column">
         <a class="ui basic compact button" href="{{ url_for('account.index') }}">
@@ -28,7 +48,8 @@
                             {% for file in storage_files %}
                             <tr>
                                 <td>{{ file }}</td>
-                                <td><a href="/account/removeStorageFile/{{ file }}"><i class="fa fa-trash"></i></a>
+                                <td><a href="/account/removeStorageFile/{{ file }}"><i
+                                            class="fa fa-trash w3-xlarge"></i></a>
                                 </td>
                             </tr>
                             {% endfor %}

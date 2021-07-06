@@ -208,7 +208,13 @@ def download_app_file(app_instance: str):
                 "Content-Disposition": f"attachment; filename={os.path.basename(path)}",
             },
         )
-    return render_template("apps/app_file_download.html", form=form)
+    return render_template(
+        "apps/app_file_download.html",
+        form=form,
+        app_url=url_for(
+            "account.demo", app_instance_id=app_instance, host="topiaas.ml"
+        ),
+    )
 
 
 @apps.route("/<app_instance>/upload", methods=["GET", "POST"])
@@ -244,7 +250,13 @@ def upload_app_file(app_instance: str):
             url_for("account.demo", app_instance_id=app_instance, host="topiaas.ml")
         )
 
-    return render_template("apps/app_file_upload.html", form=form)
+    return render_template(
+        "apps/app_file_upload.html",
+        form=form,
+        app_url=url_for(
+            "account.demo", app_instance_id=app_instance, host="topiaas.ml"
+        ),
+    )
 
 
 @apps.route("/<app_instance>/S3FileUpload", methods=["GET", "POST"])
@@ -284,4 +296,10 @@ def s3_file_upload(app_instance: str):
             url_for("account.demo", app_instance_id=app_instance, host="topiaas.ml")
         )
 
-    return render_template("apps/app_s3_file_upload.html", form=form)
+    return render_template(
+        "apps/app_s3_file_upload.html",
+        form=form,
+        app_url=url_for(
+            "account.demo", app_instance_id=app_instance, host="topiaas.ml"
+        ),
+    )
