@@ -1,8 +1,108 @@
+import random
+import string
+from abc import ABC, abstractmethod
+from app.models.user import User
 from app.lib.enumeration import SupportedApps
 from app.business import k8s
 from flask import abort, Response
 from app.lib.enumeration import AppStatus
+from app.models import AppInstance
 from datetime import datetime
+from app import db
+from dataclasses import dataclass, field
+from kubernetes.client.rest import ApiException
+
+
+@dataclass
+class AbstractApplication(ABC):
+    """Class for keeping track of an item in inventory."""
+
+    name: str
+    vcpu_limit: int
+    memory_limit: int
+    user: User
+    app_instance: AppInstance = field(init=False)
+    password: str = "".join(
+        random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+        for _ in range(8)
+    )
+
+    @abstractmethod
+    def create_db_model(self):
+        pass
+
+    def deploy(self):
+        validate_app_request(self.user, self.vcpu_limit, self.memory_limit)
+        self.app_instance = self.create_db_model()
+        db.session.add(self.app_instance)
+        db.session.flush()
+        try:
+            self.deploy_in_k8s()
+        except Exception:
+            db.session.delete(self.app_instance)
+            raise
+        db.session.commit()
+
+    @abstractmethod
+    def negotiate_k8s_resources(self):
+        pass
+
+    def deploy_in_k8s(self):
+        try:
+            app_url = self.negotiate_k8s_resources()
+        except ApiException as e:
+            print(e)
+            abort(
+                Response(
+                    "Could not deploy application. please try again later",
+                    status=503,
+                )
+            )
+        self.app_instance.url = app_url
+        self.app_instance.state = AppStatus.DEPLOYED.value
+        self.app_instance.password = self.password
+
+
+@dataclass
+class OrangeMLApplication(AbstractApplication):
+    def create_db_model(self):
+        return AppInstance(
+            app_type=SupportedApps.ORANGE_ML.value,
+            name=self.name,
+            owner=self.user.id,
+            users=[self.user],
+            vcpu_limit=self.vcpu_limit,
+            memory_limit=self.memory_limit,
+        )
+
+    def negotiate_k8s_resources(self):
+        return k8s.create_orangeml_instance(
+            name=self.app_instance.get_k8s_name(),
+            cpu_limit=self.vcpu_limit,
+            memory_limit=self.memory_limit,
+            password=self.password,
+        )
+
+
+@dataclass
+class InkscapeApplication(AbstractApplication):
+    def create_db_model(self):
+        return AppInstance(
+            app_type=SupportedApps.INKSCAPE.value,
+            name=self.name,
+            owner=self.user.id,
+            users=[self.user],
+            vcpu_limit=self.vcpu_limit,
+            memory_limit=self.memory_limit,
+        )
+
+    def negotiate_k8s_resources(self):
+        return k8s.create_inkscape_instance(
+            name=self.app_instance.get_k8s_name(),
+            cpu_limit=self.vcpu_limit,
+            memory_limit=self.memory_limit,
+            password=self.password,
+        )
 
 
 def list_supported_apps():
@@ -10,7 +110,7 @@ def list_supported_apps():
 
 
 def validate_app_request(user, vcpu_limit, memory_limit):
-    consuming_apps = [app for app in user.apps if app.state != AppStatus.DELETED.value]
+    consuming_apps = [app for app in user.apps if app.state == AppStatus.DEPLOYED.value]
     total_user_cpu_usage = sum((app.vcpu_limit for app in consuming_apps))
     total_user_memory_usage = sum((app.memory_limit for app in consuming_apps))
     free_cpu = user.vcpu_limit - total_user_cpu_usage
@@ -24,22 +124,7 @@ def validate_app_request(user, vcpu_limit, memory_limit):
         )
 
 
-def get_app_name(app):
-    return f"{app.app_type}-{app.owner}-{app.id}"
-
-
-def deploy_app(vcpu_limit, memory_limit, app, password):
-    name = get_app_name(app)
-    if app.app_type == SupportedApps.ORANGE_ML:
-        return k8s.create_orangeml_instance(
-            name=name,
-            cpu_limit=vcpu_limit,
-            memory_limit=memory_limit,
-            password=password,
-        )
-
-
-def remove_app(app):
+def remove_app(app: AppInstance):
     if app.state != AppStatus.DEPLOYED.value:
         abort(
             Response(
@@ -47,7 +132,7 @@ def remove_app(app):
                 status=400,
             )
         )
-    name = get_app_name(app)
+    name = app.get_k8s_name()
     k8s.delete_app_instance(name)
     app.state = AppStatus.DELETED.value
     app.delete_ts = datetime.now()

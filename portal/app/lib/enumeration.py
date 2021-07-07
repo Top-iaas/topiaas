@@ -59,8 +59,11 @@ class IntEnum(_IntEnum):
 
 class SupportedApps(StringEnum):
     ORANGE_ML = "orangeml"
+    INKSCAPE = "inkscape"
 
 
 class AppStatus(StringEnum):
+    DEPLOYING = "deploying"
+    ERROR = "error"
     DEPLOYED = "deployed"
     DELETED = "deleted"

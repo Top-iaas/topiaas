@@ -20,6 +20,38 @@ def create_orangeml_deployment_body(name, cpu_limit, memory_limit, password):
         ports=[client.V1ContainerPort(container_port=80)],
         resources=client.V1ResourceRequirements(
             limits={"cpu": f"{cpu_limit * 1000}m", "memory": f"{memory_limit}Mi"},
+            requests={"cpu": "100m", "memory": "256Mi"},
+        ),
+        env=[{"name": "PASSWORD", "value": password}],
+    )
+
+    template = client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(labels={"app": name}),
+        spec=client.V1PodSpec(containers=[container]),
+    )
+
+    spec = client.V1DeploymentSpec(
+        replicas=1, template=template, selector={"matchLabels": {"app": name}}
+    )
+
+    deployment = client.V1Deployment(
+        api_version="apps/v1",
+        kind="Deployment",
+        metadata=client.V1ObjectMeta(name=name),
+        spec=spec,
+    )
+
+    return deployment
+
+
+def create_inkscape_deployment_body(name, cpu_limit, memory_limit, password):
+    container = client.V1Container(
+        name=name,
+        image="topiaas/inkscape",
+        ports=[client.V1ContainerPort(container_port=80)],
+        resources=client.V1ResourceRequirements(
+            limits={"cpu": f"{cpu_limit * 1000}m", "memory": f"{memory_limit}Mi"},
+            requests={"cpu": "100m", "memory": "256Mi"},
         ),
         env=[{"name": "PASSWORD", "value": password}],
     )
@@ -123,6 +155,20 @@ def create_orangeml_instance(name, cpu_limit, memory_limit, password):
     rand_suffix = str(uuid.uuid4()).split("-")[0]
     ingress_path = f"/{name}-{rand_suffix}/websockify"
     deployment_body = create_orangeml_deployment_body(
+        name, cpu_limit, memory_limit, password
+    )
+    create_deployment(name=name, deployment=deployment_body)
+    time.sleep(2)
+    create_service(name=name, app_name=name, port=80, target_port=80)
+    time.sleep(2)
+    create_ingress(name=name, path=ingress_path, service_name=name, service_port=80)
+    return f"topiaas.ml{ingress_path}"
+
+
+def create_inkscape_instance(name, cpu_limit, memory_limit, password):
+    rand_suffix = str(uuid.uuid4()).split("-")[0]
+    ingress_path = f"/{name}-{rand_suffix}/websockify"
+    deployment_body = create_inkscape_deployment_body(
         name, cpu_limit, memory_limit, password
     )
     create_deployment(name=name, deployment=deployment_body)

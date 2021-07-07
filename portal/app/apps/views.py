@@ -1,5 +1,3 @@
-import random
-import string
 import subprocess
 import time
 import os
@@ -44,41 +42,35 @@ def index():
 @apps.route("/new/orangeml", methods=["GET", "POST"])
 @login_required
 def new_orangeml():
-    """Create a new user."""
+    """Create a orangeml instance"""
     form = DeployNewApp()
     if form.validate_on_submit():
-        vcpu_limit, memory_limit = form.vcpu_limit.data, form.memory_limit.data
-        apps_buzz.validate_app_request(current_user, vcpu_limit, memory_limit)
-        password = "".join(
-            random.choice(
-                string.ascii_uppercase + string.ascii_lowercase + string.digits
-            )
-            for _ in range(8)
+        application = apps_buzz.OrangeMLApplication(
+            form.name.data, form.vcpu_limit.data, form.memory_limit.data, current_user
         )
-        app_instance = AppInstance(
-            app_type=apps_buzz.SupportedApps.ORANGE_ML.value,
-            name=form.name.data,
-            owner=current_user.id,
-            users=[current_user],
-            vcpu_limit=form.vcpu_limit.data,
-            memory_limit=form.memory_limit.data,
-            password=password,
-        )
-        db.session.add(app_instance)
-        db.session.flush()
-        app_url = apps_buzz.deploy_app(
-            vcpu_limit,
-            memory_limit,
-            app=app_instance,
-            password=password,
-        )
-        app_instance.url = app_url
-        db.session.commit()
+        application.deploy()
         flash(
             "Instance of Orange ML is being deployed",
             "form-success",
         )
     return render_template("apps/new_app.html", form=form, app_name="Orange ML")
+
+
+@apps.route("/new/inkscape", methods=["GET", "POST"])
+@login_required
+def new_inkscape():
+    """Create a new inkscape instance"""
+    form = DeployNewApp()
+    if form.validate_on_submit():
+        application = apps_buzz.InkscapeApplication(
+            form.name.data, form.vcpu_limit.data, form.memory_limit.data, current_user
+        )
+        application.deploy()
+        flash(
+            "Instance of Inkscape is being deployed",
+            "form-success",
+        )
+    return render_template("apps/new_app.html", form=form, app_name="Inkscape")
 
 
 @apps.route("/delete/<int:app_id>")

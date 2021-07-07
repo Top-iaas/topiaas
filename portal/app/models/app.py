@@ -27,9 +27,12 @@ class AppInstance(db.Model):
     vcpu_limit = db.Column(db.Integer)
     memory_limit = db.Column(db.Integer)
     password = db.Column(db.String(64), default="")
-    state = Column(String(64), server_default=AppStatus.DEPLOYED.value)
+    state = Column(String(64), server_default=AppStatus.DEPLOYING.value)
     deploy_ts = Column(DateTime(), server_default=func.now())
     delete_ts = Column(DateTime())
 
     def __repr__(self):
         return f"<App {self.name} ID {self.id}>"
+
+    def get_k8s_name(self):
+        return f"{self.app_type}-{self.owner}-{self.id}"

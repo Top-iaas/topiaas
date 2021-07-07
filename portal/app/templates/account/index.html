@@ -138,7 +138,7 @@
                     {% if app.state != "deleted" %}
                     <tr class='clickable-row' data-href={{ app.url }}>
                         <td><i class="fa fa-user w3-text-blue w3-large"></i></td>
-                        <td>OrangeML</td>
+                        <td>{{ app.app_type }}</td>
                         <td>{{ app.name }}</td>
                         <td><i>Started at {{ app.deploy_ts}}</i></td>
                     </tr>
