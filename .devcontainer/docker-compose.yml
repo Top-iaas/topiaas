@@ -25,19 +25,19 @@ services:
       - ..:/workspace:cached
     networks:
       - topiaas-net
-  
-  inkspace:
+
+  inkscape:
     build:
-      context: "../engine/inkspace"
-      dockerfile: Dockerfile.inkspace
+      context: "../engine/inkscape"
+      dockerfile: Dockerfile.inkscape
     environment:
       PASSWORD: password2
-    container_name: inkspace
+    container_name: inkscape
     volumes:
       - ..:/workspace:cached
     networks:
       - topiaas-net
-    
+
   postgres:
     image: postgres:9.6.21
     environment:
