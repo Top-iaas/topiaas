@@ -45,8 +45,9 @@ def new_orangeml():
     """Create a orangeml instance"""
     form = DeployNewApp()
     if form.validate_on_submit():
+        user = current_user._get_current_object()
         application = apps_buzz.OrangeMLApplication(
-            form.name.data, form.vcpu_limit.data, form.memory_limit.data, current_user
+            form.name.data, form.vcpu_limit.data, form.memory_limit.data, user
         )
         application.deploy()
         flash(
@@ -62,8 +63,9 @@ def new_inkscape():
     """Create a new inkscape instance"""
     form = DeployNewApp()
     if form.validate_on_submit():
+        user = current_user._get_current_object()
         application = apps_buzz.InkscapeApplication(
-            form.name.data, form.vcpu_limit.data, form.memory_limit.data, current_user
+            form.name.data, form.vcpu_limit.data, form.memory_limit.data, user
         )
         application.deploy()
         flash(
@@ -256,8 +258,9 @@ def upload_app_file(app_instance: str):
 def s3_file_upload(app_instance: str):
     form = APPS3FileUpload()
     if form.validate_on_submit():
+        user = current_user._get_current_object()
         storage_file_name = form.storage_file.data
-        if storage_file_name not in current_user.storage_files:
+        if storage_file_name not in user.storage_files:
             abort(
                 Response(
                     f"can not find file with name {storage_file_name}",
@@ -266,7 +269,7 @@ def s3_file_upload(app_instance: str):
             )
         user_prefix = f"user.{current_user.id}."
         file_path = f"/tmp/{user_prefix}{storage_file_name}"
-        s3_download(current_user, storage_file_name, file_path)
+        s3_download(user, storage_file_name, file_path)
         pod_name = get_orange_ml_pod_name("-".join(app_instance.split("-")[:-1]))
         p = subprocess.run(
             [
