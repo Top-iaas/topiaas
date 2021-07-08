@@ -1,5 +1,6 @@
 import random
 import string
+import urllib3.exceptions
 from abc import ABC, abstractmethod
 from app.models.user import User
 from app.lib.enumeration import SupportedApps
@@ -50,7 +51,7 @@ class AbstractApplication(ABC):
     def deploy_in_k8s(self):
         try:
             app_url = self.negotiate_k8s_resources()
-        except ApiException as e:
+        except (ApiException, urllib3.exceptions.ProtocolError) as e:
             print(e)
             abort(
                 Response(
@@ -133,6 +134,15 @@ def remove_app(app: AppInstance):
             )
         )
     name = app.get_k8s_name()
-    k8s.delete_app_instance(name)
+    try:
+        k8s.delete_app_instance(name)
+    except (ApiException, urllib3.exceptions.ProtocolError) as e:
+        print(e)
+        abort(
+            Response(
+                "Could not delete application. please try again later",
+                status=503,
+            )
+        )
     app.state = AppStatus.DELETED.value
     app.delete_ts = datetime.now()
