@@ -12,6 +12,7 @@ from datetime import datetime
 from app import db
 from dataclasses import dataclass, field
 from kubernetes.client.rest import ApiException
+import logging
 
 
 @dataclass
@@ -49,10 +50,12 @@ class AbstractApplication(ABC):
         pass
 
     def deploy_in_k8s(self):
+        logging.info(f"deploying app: {self.app_instance.get_k8s_name()}")
         try:
             app_url = self.negotiate_k8s_resources()
         except (ApiException, urllib3.exceptions.ProtocolError) as e:
-            print(e)
+            logging.error(e)
+            remove_app(self.app_instance)
             abort(
                 Response(
                     "Could not deploy application. please try again later",
@@ -134,10 +137,11 @@ def remove_app(app: AppInstance):
             )
         )
     name = app.get_k8s_name()
+    logging.info(f"Removing app: {name}")
     try:
         k8s.delete_app_instance(name)
     except (ApiException, urllib3.exceptions.ProtocolError) as e:
-        print(e)
+        logging.error(e)
         abort(
             Response(
                 "Could not delete application. please try again later",

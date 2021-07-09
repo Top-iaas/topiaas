@@ -2,6 +2,9 @@ import time
 import uuid
 
 from kubernetes import client, config
+from typing import Callable
+
+from kubernetes.client.rest import ApiException
 
 try:
     config.load_incluster_config()
@@ -179,10 +182,26 @@ def create_inkscape_instance(name, cpu_limit, memory_limit, password):
     return f"topiaas.ml{ingress_path}"
 
 
+def k8s_delete_if_exists(call: Callable, name: str, namespace: str = "default"):
+    try:
+        call(name=name, namespace=namespace)
+    except ApiException as e:
+        if e.status != 404:
+            raise
+
+
 def delete_app_instance(name):
-    apps_v1_api.delete_namespaced_deployment(name=name, namespace="default")
-    core_v1_api.delete_namespaced_service(name=name, namespace="default")
-    networking_v1_beta1_api.delete_namespaced_ingress(name=name, namespace="default")
+    k8s_delete_if_exists(
+        apps_v1_api.delete_namespaced_deployment, name=name, namespace="default"
+    )
+    k8s_delete_if_exists(
+        core_v1_api.delete_namespaced_service, name=name, namespace="default"
+    )
+    k8s_delete_if_exists(
+        networking_v1_beta1_api.delete_namespaced_ingress,
+        name=name,
+        namespace="default",
+    )
     return True
 
 

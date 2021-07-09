@@ -87,15 +87,11 @@ def delete_app_instance(app_id):
         for app in user_apps:
             if app.id == app_id:
                 apps_buzz.remove_app(app)
-                flash(
-                    f"Successfully deleted {app.app_type} App with id {app.id}."
-                    "success",
-                )
                 break
         else:
             abort(403)
     db.session.commit()
-    return redirect(url_for("account.index"))
+    return redirect(url_for("apps.index"))
 
 
 @apps.route("/<int:app_id>", methods=["GET"])
