@@ -128,8 +128,8 @@ def validate_app_request(user, vcpu_limit, memory_limit):
         )
 
 
-def remove_app(app: AppInstance):
-    if app.state != AppStatus.DEPLOYED.value:
+def remove_app(app: AppInstance, force=False):
+    if not force and app.state != AppStatus.DEPLOYED.value:
         abort(
             Response(
                 "App is not in state DEPLOYED",
