@@ -2,6 +2,11 @@
 [![Build and push portal image](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishPortal.yml/badge.svg)](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishPortal.yml)
 [![Build and push inkscape image](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishInkspace.yml/badge.svg)](https://github.com/Top-iaas/topiaas/actions/workflows/BuildPublishInkspace.yml)
 # topiaas
+
+## Infrastructure
+
+![](./assets/Topiaas cloud arch.png)
+
 ## Architecture
 
 ![](./assets/Architecture.png)
