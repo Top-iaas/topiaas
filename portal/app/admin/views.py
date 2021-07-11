@@ -1,3 +1,4 @@
+from app.lib.enumeration import AppStatus
 from flask import (
     Blueprint,
     abort,
@@ -20,6 +21,10 @@ from app.admin.forms import (
 from app.decorators import admin_required
 from app.email import send_email
 from app.models import EditableHTML, Role, User
+from app.business import apps as apps_buzz
+from app.utils import s3_remove
+from minio.error import MinioException, S3Error, ServerError
+from werkzeug import Response
 
 admin = Blueprint("admin", __name__)
 
@@ -182,6 +187,20 @@ def delete_user(user_id):
         )
     else:
         user = User.query.filter_by(id=user_id).first()
+        for app in user.apps:
+            if app.state != AppStatus.DELETED.value:
+                apps_buzz.remove_app(app, force=True)
+            db.session.delete(app)
+        for filename in user.storage_files:
+            try:
+                s3_remove(user, filename)
+            except (MinioException, S3Error, ServerError):
+                abort(
+                    Response(
+                        "Could not remove file from remote storage",
+                        status=503,
+                    )
+                )
         db.session.delete(user)
         db.session.commit()
         flash("Successfully deleted user %s." % user.full_name(), "success")

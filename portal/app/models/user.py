@@ -82,7 +82,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
     apps = db.relationship(
-        "AppInstance", secondary=app_user_association, back_populates="users"
+        "AppInstance",
+        secondary=app_user_association,
+        back_populates="users",
+        cascade="all, delete",
     )
     vcpu_limit = db.Column(db.Integer, default=0)
     memory_limit = db.Column(db.Integer, default=0)

@@ -11,6 +11,9 @@ from flask_wtf import CSRFProtect
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
 from config import config as Config
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
