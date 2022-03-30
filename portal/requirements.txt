@@ -46,3 +46,5 @@ WTForms==2.2.1
 flake8
 kubernetes==12.0.1
 minio==7.0.4
+ptvsd==4.3.2
+sqlalchemy_utils 

@@ -118,17 +118,6 @@ class ProductionConfig(Config):
         flask_raygun.Provider(app, app.config["RAYGUN_APIKEY"]).attach()
 
 
-class HerokuConfig(ProductionConfig):
-    @classmethod
-    def init_app(cls, app):
-        ProductionConfig.init_app(app)
-
-        # Handle proxy server headers
-        from werkzeug.contrib.fixers import ProxyFix
-
-        app.wsgi_app = ProxyFix(app.wsgi_app)
-
-
 class UnixConfig(ProductionConfig):
     @classmethod
     def init_app(cls, app):
@@ -148,6 +137,5 @@ config = {
     "testing": TestingConfig,
     "production": ProductionConfig,
     "default": DevelopmentConfig,
-    "heroku": HerokuConfig,
     "unix": UnixConfig,
 }
