@@ -8,7 +8,7 @@ from flask_login import (
 from flask_rq import get_queue
 
 from app import db
-from app.account.forms import (
+from app.blueprints.account.forms import (
     ChangeEmailForm,
     ChangePasswordForm,
     CreatePasswordForm,
@@ -18,9 +18,9 @@ from app.account.forms import (
     ResetPasswordForm,
     ChangeCapacityLimits,
 )
-from app.apps.forms import S3FileUpload
-from app.utils import s3_upload, s3_remove
-from app.email import send_email
+from app.blueprints.apps.forms import S3FileUpload
+from app.lib.utils import s3_upload, s3_remove
+from app.lib.email import send_email
 from app.models import User
 from app.business import account as account_buzz
 from werkzeug.utils import secure_filename

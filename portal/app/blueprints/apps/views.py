@@ -5,11 +5,16 @@ from tempfile import NamedTemporaryFile
 
 import app.business.apps as apps_buzz
 from app import db
-from app.apps.forms import AppFileDownload, AppFileUpload, DeployNewApp, APPS3FileUpload
+from app.blueprints.apps.forms import (
+    AppFileDownload,
+    AppFileUpload,
+    DeployNewApp,
+    APPS3FileUpload,
+)
 from app.business.k8s import get_orange_ml_pod_name
 from app.lib.enumeration import AppStatus
 from app.models import AppInstance
-from app.utils import s3_download
+from app.lib.utils import s3_download
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
 from flask.wrappers import Response

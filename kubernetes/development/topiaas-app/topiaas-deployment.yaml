@@ -27,7 +27,7 @@ spec:
       containers:
         - name: topiaas
           image: topiaas/portal:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
             - containerPort: 5800
