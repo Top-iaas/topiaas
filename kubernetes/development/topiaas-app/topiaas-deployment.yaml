@@ -55,14 +55,20 @@ spec:
               value: development
             - name: REDISTOGO_URL
               value: "http://redis-cluster-master:6379"
-            - name: DATABASE_USER
-              value: devel
             - name: DATABASE_PORT
               value: "5432"
             - name: DATABASE_SERVICE_NAME
-              value: postgres-postgresql-ha-pgpool
+              value: postgres
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
             - name: DATABASE_PASSWORD
-              value: password
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
           resources:
             limits:
               memory: "512Mi"

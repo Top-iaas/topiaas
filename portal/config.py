@@ -40,7 +40,7 @@ class Config:
     DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
     DATABASE_SERVICE_NAME = os.environ.get("DATABASE_SERVICE_NAME")
     DATABASE_PORT = os.environ.get("DATABASE_PORT", 5432)
-    DEFAULT_DATABASE_URI = f"postgres://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_SERVICE_NAME}:{DATABASE_PORT}/db"
+    DEFAULT_DATABASE_URI = f"postgres://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_SERVICE_NAME}:{DATABASE_PORT}/postgresdb"
 
     # Analytics
     GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID", "")
@@ -75,6 +75,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
+    TEMPLATES_AUTO_RELOAD = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL", Config.DEFAULT_DATABASE_URI
     )
