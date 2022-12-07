@@ -30,7 +30,7 @@ class RegistrationForm(FlaskForm):
         validators=[InputRequired(), EqualTo("password2", "Passwords must match")],
     )
     password2 = PasswordField("Confirm password", validators=[InputRequired()])
-    vcpu_limit = IntegerField(
+    cpu_limit = IntegerField(
         "Maximum CPU capacity",
         validators=[InputRequired(), NumberRange(min=1)],
     )
@@ -48,7 +48,7 @@ class RegistrationForm(FlaskForm):
 
 
 class ChangeCapacityLimits(FlaskForm):
-    vcpu_limit = IntegerField(
+    cpu_limit = IntegerField(
         "Maximum CPU capacity",
         validators=[InputRequired(), NumberRange(min=1)],
     )

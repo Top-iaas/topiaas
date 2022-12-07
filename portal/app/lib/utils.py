@@ -1,9 +1,10 @@
-from flask import url_for
+from flask import url_for, request
 from wtforms.fields import Field
 from wtforms.widgets import HiddenInput
 from wtforms.compat import text_type
 from app.models.user import User
 from minio import Minio
+from urllib.parse import urlparse, urljoin
 import os
 
 
@@ -84,3 +85,9 @@ def s3_remove(user: User, filename: str):
 def s3_download(user: User, filename: str, filepath: str):
     bucket = get_user_bucket(user)
     minio_cl.fget_object(bucket, filename, filepath)
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ("http", "https") and ref_url.netloc == test_url.netloc

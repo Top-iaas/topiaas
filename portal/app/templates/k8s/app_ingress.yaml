@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: orangeml
+  name: {{ name }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -14,10 +14,10 @@ spec:
         paths:
           - backend:
               service:
-                name: orangeml-service-0
+                name: {{ service_name }}
                 port:
-                  number: 80
-            path: /orangeml-test-0/websockify
+                  number: {{ service_port }}
+            path: {{ path }}
             pathType: Prefix
   tls:
     - hosts:

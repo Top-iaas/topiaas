@@ -6,11 +6,15 @@ from flask_wtf.file import FileField, FileRequired
 
 
 class DeployNewApp(FlaskForm):
+    app_type = StringField(
+        "Type",
+        validators=[InputRequired()],
+    )
     name = StringField(
         "Name",
         validators=[InputRequired()],
     )
-    vcpu_limit = IntegerField(
+    cpu_limit = IntegerField(
         "CPU capacity",
         validators=[InputRequired(), NumberRange(min=1)],
     )

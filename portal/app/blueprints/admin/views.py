@@ -76,7 +76,6 @@ def invite_user():
         invite_link = url_for(
             "account.join_from_invite", user_id=user.id, token=token, _external=True
         )
-        user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=user.email,
@@ -191,9 +190,9 @@ def delete_user(user_id):
             if app.state != AppStatus.DELETED.value:
                 apps_buzz.remove_app(app, force=True)
             db.session.delete(app)
-        for filename in user.storage_files:
+        for file in user.files.query.filter().all():
             try:
-                s3_remove(user, filename)
+                s3_remove(user, file.name)
             except (MinioException, S3Error, ServerError):
                 abort(
                     Response(
@@ -201,6 +200,7 @@ def delete_user(user_id):
                         status=503,
                     )
                 )
+            db.session.delete(file)
         db.session.delete(user)
         db.session.commit()
         flash("Successfully deleted user %s." % user.full_name(), "success")

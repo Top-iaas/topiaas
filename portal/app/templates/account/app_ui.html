@@ -1,0 +1,101 @@
+{% extends 'layouts/base.html' %} 
+
+{% block exhead %}
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body {
+            margin: 0;
+            background-color: dimgrey;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Style the links inside the sidenav */
+        #mySidenav {
+            position: absolute;
+            /* Position them relative to the browser window */
+            left: -80px;
+            /* Position them outside of the screen */
+            transition: 0.3s;
+            /* Add transition on hover */
+            padding: 25px;
+            /* 15px padding */
+            width: 100px;
+            /* Set a specific width */
+            text-decoration: none;
+            /* Remove underline */
+            font-size: 20px;
+            /* Increase font size */
+            color: black;
+            /* White text color */
+            border-radius: 0 5px 5px 0;
+            /* Rounded corners on the top right and bottom right side */
+            background-color: white
+        }
+
+        #mySidenav:hover {
+            left: 0;
+            /* On mouse-over, make the elements appear as they should */
+        }
+
+
+        html {
+            height: 100%;
+        }
+
+        #top_bar {
+            background-color: #6e84a3;
+            color: white;
+            font: bold 12px Helvetica;
+            padding: 6px 5px 4px 5px;
+            border-bottom: 1px outset;
+        }
+
+        #status {
+            text-align: center;
+        }
+
+        #sendCtrlAltDelButton {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            border: 1px outset;
+            padding: 5px 5px 4px 5px;
+            cursor: pointer;
+        }
+
+        #screen {
+            flex: 1;
+            /* fill remaining space */
+            overflow: hidden;
+        }
+    </style>
+
+<script type="module" src="/static/scripts/novnc.js"></script>
+{% endblock %}
+
+{% block content %}
+<body>
+    <div id="top_bar">
+        <div id="status">Loading</div>
+        <div id="sendCtrlAltDelButton">Send CtrlAltDel</div>
+    </div>
+    <div id="screen">
+        <div id="mySidenav">
+            <a href="/apps/{{ app_instance }}/upload" class="w3-bar-item w3-button w3-padding" title="Upload file"><i
+                    class="fa fa-upload"></i></a>
+            <a href="/apps/{{ app_instance }}/S3FileUpload" class="w3-bar-item w3-button w3-padding" title="Upload File From S3"><i class="fa fa-cloud-upload"></i>
+            </a>
+            <a href="/apps/{{ app_instance }}/download" class="w3-bar-item w3-button w3-padding" title="Download File"><i class="fa fa-download"></i>
+            </a>
+        </div>
+        <!-- This is where the remote screen will appear -->
+    </div>
+</body>
+
+</html>
+{% endblock %}

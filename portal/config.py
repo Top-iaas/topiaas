@@ -1,7 +1,6 @@
 import os
 import urllib.parse
 
-from raygun4py.middleware import flask as flask_raygun
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -115,8 +114,6 @@ class ProductionConfig(Config):
     def init_app(cls, app):
         Config.init_app(app)
         assert os.environ.get("SECRET_KEY"), "SECRET_KEY IS NOT SET!"
-
-        flask_raygun.Provider(app, app.config["RAYGUN_APIKEY"]).attach()
 
 
 class UnixConfig(ProductionConfig):

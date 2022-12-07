@@ -1,27 +1,12 @@
-{% extends 'layouts/base.html' %}
-{% import 'macros/form_macros.html' as f %}
-{% import 'macros/check_password.html' as check %}
-
-{% set endpoints = [
-('account.manage', 'Account information'),
-('account.change_capacity_limits', 'Change Capacity Limits'),
-('account.change_email_request', 'Change email address'),
-('account.change_password', 'Change password'),
-('account.logout', 'Log out')
-] %}
-
-{% macro navigation(items) %}
+{% extends 'layouts/base.html' %} {% import 'macros/form_macros.html' as f %} {% import 'macros/check_password.html' as check %} {% set endpoints = [ ('account.manage', 'Account information'), ('account.change_capacity_limits', 'Change Capacity Limits'),
+('account.change_email_request', 'Change email address'), ('account.change_password', 'Change password'), ('account.logout', 'Log out') ] %} {% macro navigation(items) %}
 <div class="ui vertical fluid secondary menu">
-    {% for route, name in items %}
-    {% set href = url_for(route) %}
+    {% for route, name in items %} {% set href = url_for(route) %}
     <a class="item {% if request.endpoint == route %}active{% endif %}" href="{{ href }}">
         {{ name }}
-    </a>
-    {% endfor %}
+    </a> {% endfor %}
 </div>
-{% endmacro %}
-
-{% macro user_info(user) %}
+{% endmacro %} {% macro user_info(user) %}
 <table class="ui compact definition table">
     <tr>
         <td>Full name</td>
@@ -37,16 +22,14 @@
     </tr>
     <tr>
         <td>Maximum VCPU</td>
-        <td>{{ user.vcpu_limit }}</td>
+        <td>{{ user.cpu_limit }}</td>
     </tr>
     <tr>
         <td>Maximum Memory</td>
         <td>{{ user.memory_limit }}</td>
     </tr>
 </table>
-{% endmacro %}
-
-{% block content %}
+{% endmacro %} {% block content %}
 <div class="ui stackable centered grid container">
     <div class="twelve wide column">
         <h2 class="ui header">
@@ -59,13 +42,8 @@
             {{ navigation(endpoints) }}
         </div>
         <div class="eight wide column">
-            {% if form %}
-            {{ f.render_form(form, extra_classes='fluid') }}
-            {% else %}
-            {{ user_info(user) }}
-            {% endif %}
+            {% if form %} {{ f.render_form(form, extra_classes='fluid') }} {% else %} {{ user_info(user) }} {% endif %}
         </div>
     </div>
 </div>
-{{ check.password_check('new_password', 0) }}
-{% endblock %}
+{{ check.password_check('new_password', 0) }} {% endblock %}

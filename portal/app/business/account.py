@@ -17,7 +17,7 @@ def change_limits(user_id, vcpu=None, memory=None):
     validate_limits(vcpu, memory)
     user = User.query.get_or_404(int(user_id))
     if vcpu:
-        user.vcpu_limit = vcpu
+        user.cpu_limit = vcpu
     if memory:
         user.memory_limit = memory
     db.session.add(user)

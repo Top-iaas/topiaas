@@ -13,7 +13,7 @@ from app.blueprints.apps.forms import (
 )
 from app.business.k8s import get_orange_ml_pod_name
 from app.lib.enumeration import AppStatus
-from app.models import AppInstance
+from app.models import AppInstance, AppFile
 from app.lib.utils import s3_download
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, url_for
 from flask.globals import request
@@ -44,40 +44,26 @@ def index():
     )
 
 
-@apps.route("/new/orangeml", methods=["GET", "POST"])
+@apps.route("/new", methods=["GET", "POST"])
 @login_required
-def new_orangeml():
-    """Create a orangeml instance"""
+def new():
     form = DeployNewApp()
     if form.validate_on_submit():
         user = current_user._get_current_object()
-        application = apps_buzz.OrangeMLApplication(
-            form.name.data, form.vcpu_limit.data, form.memory_limit.data, user
-        )
+        data = {
+            "app_type": form.app_type.data,
+            "name": form.name.data,
+            "cpu_limit": form.cpu_limit.data,
+            "memory_limit": form.memory_limit.data,
+            "user": user,
+        }
+        application = apps_buzz.get_app_object(data)
         application.deploy()
         flash(
-            "Instance of Orange ML is being deployed",
+            f"Instance of {form.app_type.data} is being deployed",
             "form-success",
         )
-    return render_template("apps/new_app.html", form=form, app_name="Orange ML")
-
-
-@apps.route("/new/inkscape", methods=["GET", "POST"])
-@login_required
-def new_inkscape():
-    """Create a new inkscape instance"""
-    form = DeployNewApp()
-    if form.validate_on_submit():
-        user = current_user._get_current_object()
-        application = apps_buzz.InkscapeApplication(
-            form.name.data, form.vcpu_limit.data, form.memory_limit.data, user
-        )
-        application.deploy()
-        flash(
-            "Instance of Inkscape is being deployed",
-            "form-success",
-        )
-    return render_template("apps/new_app.html", form=form, app_name="Inkscape")
+    return render_template("apps/new_app.html", form=form, app_name="Application")
 
 
 @apps.route("/delete/<int:app_id>")
@@ -167,9 +153,7 @@ def get_app_usage_billing(app_id: int):
         "memory_consumption": round(
             billing_seconds / 3600 * MEMORY_PRICE * app.memory_limit, 2
         ),
-        "cpu_consumption": round(
-            billing_seconds / 3600 * CPU_PRICE * app.vcpu_limit, 2
-        ),
+        "cpu_consumption": round(billing_seconds / 3600 * CPU_PRICE * app.cpu_limit, 2),
     }
     return jsonify(usage)
 
@@ -261,7 +245,7 @@ def s3_file_upload(app_instance: str):
     if form.validate_on_submit():
         user = current_user._get_current_object()
         storage_file_name = form.storage_file.data
-        if storage_file_name not in user.storage_files:
+        if not AppFile.query.filter_by(user=current_user, name=filename):
             abort(
                 Response(
                     f"can not find file with name {storage_file_name}",

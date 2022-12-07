@@ -1,4 +1,12 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+    abort,
+)
 from flask_login import (
     current_user,
     login_required,
@@ -22,10 +30,12 @@ from app.blueprints.apps.forms import S3FileUpload
 from app.lib.utils import s3_upload, s3_remove
 from app.lib.email import send_email
 from app.models import User
+from app.models.app import AppFile
 from app.business import account as account_buzz
 from werkzeug.utils import secure_filename
 from werkzeug import Response
 from minio.error import MinioException, S3Error, ServerError
+from app.lib.utils import is_safe_url
 import os
 
 account = Blueprint("account", __name__)
@@ -44,7 +54,11 @@ def login():
         ):
             login_user(user, form.remember_me.data)
             flash("You are now logged in. Welcome back!", "success")
-            return redirect(request.args.get("next") or url_for("main.index"))
+            # check against open redirects
+            _next = request.args.get("next")
+            if _next and is_safe_url(_next):
+                return redirect(_next)
+            return redirect(url_for("main.index"))
         else:
             flash("Invalid email or password.", "error")
     return render_template("account/login.html", form=form)
@@ -60,14 +74,13 @@ def register():
             last_name=form.last_name.data,
             email=form.email.data,
             password=form.password.data,
-            vcpu_limit=form.vcpu_limit.data,
+            cpu_limit=form.cpu_limit.data,
             memory_limit=form.memory_limit.data,
         )
         db.session.add(user)
         db.session.commit()
         token = user.generate_confirmation_token()
         confirm_link = url_for("account.confirm", token=token, _external=True)
-        user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=user.email,
@@ -108,7 +121,6 @@ def reset_password_request():
         if user:
             token = user.generate_password_reset_token()
             reset_link = url_for("account.reset_password", token=token, _external=True)
-            user.__dict__.pop("storage_files")
             get_queue().enqueue(
                 send_email,
                 recipient=user.email,
@@ -176,7 +188,6 @@ def change_email_request():
                 "account.change_email", token=token, _external=True
             )
             user = current_user._get_current_object()
-            user.__dict__.pop("storage_files")
             get_queue().enqueue(
                 send_email,
                 recipient=new_email,
@@ -203,7 +214,7 @@ def change_capacity_limits():
     form = ChangeCapacityLimits()
     if form.validate_on_submit():
         account_buzz.change_limits(
-            current_user.id, form.vcpu_limit.data, form.memory_limit.data
+            current_user.id, form.cpu_limit.data, form.memory_limit.data
         )
         flash("Capacity limits have been set successfully", "form-success")
         return redirect(url_for("main.index"))
@@ -228,7 +239,6 @@ def confirm_request():
     token = current_user.generate_confirmation_token()
     confirm_link = url_for("account.confirm", token=token, _external=True)
     user = current_user._get_current_object()
-    user.__dict__.pop("storage_files")
     get_queue().enqueue(
         send_email,
         recipient=current_user.email,
@@ -300,7 +310,6 @@ def join_from_invite(user_id, token):
         invite_link = url_for(
             "account.join_from_invite", user_id=user_id, token=token, _external=True
         )
-        new_user.__dict__.pop("storage_files")
         get_queue().enqueue(
             send_email,
             recipient=new_user.email,
@@ -350,7 +359,7 @@ def billing():
 @login_required
 def demo(host, app_instance_id):
     """Instance of orangeML"""
-    return render_template("account/demo.html", app_instance=app_instance_id)
+    return render_template("account/app_ui.html", app_instance=app_instance_id)
 
 
 @account.route("/uploadFileToS3", methods=["GET", "POST"])
@@ -363,6 +372,9 @@ def upload_file_to_s3():
         f.save(file_path)
         try:
             s3_upload(current_user, filename, file_path)
+            _file = AppFile(name=filename, user=current_user)
+            db.session.add(_file)
+            db.session.commit()
         except (MinioException, S3Error, ServerError):
             abort(
                 Response(
@@ -370,11 +382,8 @@ def upload_file_to_s3():
                     status=503,
                 )
             )
-        os.remove(file_path)
-        if filename not in current_user.storage_files:
-            current_user.storage_files.append(filename)
-        db.session.add(current_user)
-        db.session.commit()
+        finally:
+            os.remove(file_path)
         return redirect(url_for("account.storage_files"))
     return render_template("account/upload_file.html", form=form)
 
@@ -382,7 +391,7 @@ def upload_file_to_s3():
 @account.route("/removeStorageFile/<string:filename>", methods=["GET", "POST"])
 def remove_file_in_s3(filename):
     """Delete a file from the S3 storage"""
-    if filename not in current_user.storage_files:
+    if not AppFile.query.filter_by(user=current_user, name=filename):
         abort(
             Response(
                 f"can not find file with name {filename}",
@@ -398,8 +407,8 @@ def remove_file_in_s3(filename):
                 status=503,
             )
         )
-    current_user.storage_files.remove(filename)
-    db.session.add(current_user)
+    file = AppFile.query.filter_by(name=filename).first_or_404()
+    db.session.delete(file)
     db.session.commit()
     return redirect(url_for("account.storage_files"))
 
@@ -408,5 +417,5 @@ def remove_file_in_s3(filename):
 @login_required
 def storage_files():
     return render_template(
-        "account/storage_files.html", storage_files=current_user.storage_files
+        "account/storage_files.html", storage_files=current_user.files
     )
