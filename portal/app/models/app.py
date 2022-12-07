@@ -18,13 +18,15 @@ class AppInstance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     index = db.Column(db.String(64))
     name = db.Column(db.String(64))
+    k8s_id = db.Column(db.String(64))
+    image_name = db.Column(db.String(64))
     app_type = db.Column(db.String(64))
     url = db.Column(db.String(128))
     owner = db.Column(db.Integer, db.ForeignKey("users.id"))
     users = db.relationship(
         "User", secondary=app_user_association, back_populates="apps"
     )
-    vcpu_limit = db.Column(db.Integer)
+    cpu_limit = db.Column(db.Integer)
     memory_limit = db.Column(db.Integer)
     password = db.Column(db.String(64), default="")
     state = Column(String(64), server_default=AppStatus.DEPLOYING.value)
@@ -34,5 +36,8 @@ class AppInstance(db.Model):
     def __repr__(self):
         return f"<App {self.name} ID {self.id}>"
 
-    def get_k8s_name(self):
-        return f"{self.app_type}-{self.owner}-{self.id}"
+
+class AppFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))

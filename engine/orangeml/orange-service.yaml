@@ -4,7 +4,7 @@ metadata:
   name: orangeml-service-0
 spec:
   selector:
-    app: orangeml-0
+    name: orangeml
   ports:
     - protocol: TCP
       port: 80

@@ -1,24 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orangeml-0
+  name: orangeml
   labels:
-    app: orangeml
+    name: orangeml
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: orangeml-0
+      name: orangeml
   template:
     metadata:
       labels:
-        app: orangeml-0
+        name: orangeml
     spec:
       containers:
-      - name: orangeml
-        image: topiaas/orangeml
-        ports:
-        - containerPort: 80
-        env:
-        - name: PASSWORD
-          value: password
+        - name: orangeml
+          image: topiaas/orangeml:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: PASSWORD
+              value: password
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi

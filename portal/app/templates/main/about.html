@@ -1,24 +1,13 @@
-{% import 'macros/page_macros.html' as page %}
-{% extends 'layouts/base.html' %}
-
-{% block content %}
+{% extends 'layouts/base.html' %} {% block content %}
 <div class="ui text container">
     <h1>About</h1>
     {{ page.render_inline_editor(editable_html_obj, current_user) }}
-    <p>Software applications are taking more part in our day-to-day life, yet most of the useful applications are either
-        intended to be used on desktops or require more and more resources. Although cloud computing has prevailed in
-        the past years, most users are not familiar with the process of configuring a server to set up their workloads.
-        Even if a user manages to configure a server, the user experience would still feel abnormal and convoluted. That
-        being said, access to cloud-based applications that are intuitive, efficient and usable from any commodity
-        device appears to be an area of huge market potential. Topiaas is a product that aims at this point by providing
-        the infrastructure needed to run containerized applications within a cluster in the cloud. We offer a
-        near-native application experience all through the browser, while not compromising the huge potential of the
-        cloud. By making the infrastructure completely agnostic to the underlying cloud as well as using a
-        state-of-the-art container orchestrator, the product has the potential of huge scalability as well as the
-        ability to support a very wide variety of applications. Topiaas is currently hosted at topiaas.ml with support
-        for 2 applications, namely Orangeml and inkscape. Having said that, the product proves to deliver on the
-        promises of scalable, elastic and easy to use applications all via the browser with intuitive UI and very
-        minimal overhead at an affordable price.
+    <p>Software applications are taking more part in our day-to-day life, yet most of the useful applications are either intended to be used on desktops or require more and more resources. Although cloud computing has prevailed in the past years, most users
+        are not familiar with the process of configuring a server to set up their workloads. Even if a user manages to configure a server, the user experience would still feel abnormal and convoluted. That being said, access to cloud-based applications
+        that are intuitive, efficient and usable from any commodity device appears to be an area of huge market potential. Topiaas is a product that aims at this point by providing the infrastructure needed to run containerized applications within a cluster
+        in the cloud. We offer a near-native application experience all through the browser, while not compromising the huge potential of the cloud. By making the infrastructure completely agnostic to the underlying cloud as well as using a state-of-the-art
+        container orchestrator, the product has the potential of huge scalability as well as the ability to support a very wide variety of applications. Topiaas is currently hosted at topiaas.ml with support for 2 applications, namely Orangeml and inkscape.
+        Having said that, the product proves to deliver on the promises of scalable, elastic and easy to use applications all via the browser with intuitive UI and very minimal overhead at an affordable price.
     </p>
 </div>
 

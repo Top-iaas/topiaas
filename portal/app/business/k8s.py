@@ -1,8 +1,10 @@
 import time
 import uuid
+import yaml
 
 from kubernetes import client, config
 from typing import Callable
+from flask import render_template
 
 from kubernetes.client.rest import ApiException
 
@@ -17,63 +19,31 @@ networking_v1_beta1_api = client.NetworkingV1beta1Api()
 
 
 def create_orangeml_deployment_body(name, cpu_limit, memory_limit, password):
-    container = client.V1Container(
+    deployment_yaml = render_template(
+        "k8s/app_deployment.yaml",
         name=name,
-        image="topiaas/orangeml",
-        ports=[client.V1ContainerPort(container_port=80)],
-        resources=client.V1ResourceRequirements(
-            limits={"cpu": f"{cpu_limit * 1000}m", "memory": f"{memory_limit}Mi"},
-            requests={"cpu": "100m", "memory": "256Mi"},
-        ),
-        env=[{"name": "PASSWORD", "value": password}],
+        image="topiaas/orangeml:latest",
+        cpu_limit=cpu_limit * 1000,
+        memory_limit=memory_limit,
+        port=80,
+        password=password,
     )
-
-    template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": name}),
-        spec=client.V1PodSpec(containers=[container]),
-    )
-
-    spec = client.V1DeploymentSpec(
-        replicas=1, template=template, selector={"matchLabels": {"app": name}}
-    )
-
-    deployment = client.V1Deployment(
-        api_version="apps/v1",
-        kind="Deployment",
-        metadata=client.V1ObjectMeta(name=name),
-        spec=spec,
-    )
+    deployment = yaml.safe_load(deployment_yaml)
 
     return deployment
 
 
 def create_inkscape_deployment_body(name, cpu_limit, memory_limit, password):
-    container = client.V1Container(
+    deployment_yaml = render_template(
+        "k8s/app_deployment.yaml",
         name=name,
-        image="topiaas/inkscape",
-        ports=[client.V1ContainerPort(container_port=80)],
-        resources=client.V1ResourceRequirements(
-            limits={"cpu": f"{cpu_limit * 1000}m", "memory": f"{memory_limit}Mi"},
-            requests={"cpu": "100m", "memory": "256Mi"},
-        ),
-        env=[{"name": "PASSWORD", "value": password}],
+        image="topiaas/inkscape:latest",
+        cpu_limit=cpu_limit * 1000,
+        memory_limit=memory_limit,
+        port=80,
+        password=password,
     )
-
-    template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": name}),
-        spec=client.V1PodSpec(containers=[container]),
-    )
-
-    spec = client.V1DeploymentSpec(
-        replicas=1, template=template, selector={"matchLabels": {"app": name}}
-    )
-
-    deployment = client.V1Deployment(
-        api_version="apps/v1",
-        kind="Deployment",
-        metadata=client.V1ObjectMeta(name=name),
-        spec=spec,
-    )
+    deployment = yaml.safe_load(deployment_yaml)
 
     return deployment
 
@@ -96,16 +66,12 @@ def create_deployment(name, deployment):
     )
 
 
-def create_service(name, app_name, port, target_port):
-    body = {
-        "apiVersion": "v1",
-        "kind": "Service",
-        "metadata": {"name": app_name},
-        "spec": {
-            "selector": {"app": app_name},
-            "ports": [{"protocol": "TCP", "port": port, "targetPort": target_port}],
-        },
-    }
+def create_service(name, port, target_port):
+    body_yaml = render_template(
+        "k8s/app_service.yaml", name=name, port=port, target_port=target_port
+    )
+    body = yaml.safe_load(body_yaml)
+
     resp = core_v1_api.create_namespaced_service(body=body, namespace="default")
 
     print(f"\n[INFO] Service `{name}` created.\n")
@@ -120,38 +86,26 @@ def create_service(name, app_name, port, target_port):
 
 
 def create_ingress(name, path, service_name, service_port):
-    body = {
-        "apiVersion": "networking.k8s.io/v1beta1",
-        "kind": "Ingress",
-        "metadata": {
-            "name": name,
-            "annotations": {
-                "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
-                "nginx.ingress.kubernetes.io/use-regex": "true",
-            },
-        },
-        "spec": {
-            "rules": [
-                {
-                    "host": "topiaas.ml",
-                    "http": {
-                        "paths": [
-                            {
-                                "backend": {
-                                    "serviceName": service_name,
-                                    "servicePort": service_port,
-                                },
-                                "path": path,
-                                "pathType": "Prefix",
-                            }
-                        ]
-                    },
-                }
-            ],
-            "tls": [{"hosts": ["topiaas.ml"], "secretName": "topiaas-ml-tls"}],
-        },
-    }
+    body_yaml = render_template(
+        "k8s/app_ingress.yaml",
+        name=name,
+        service_name=service_name,
+        service_port=service_port,
+        path=path,
+    )
+    body = yaml.safe_load(body_yaml)
     networking_v1_beta1_api.create_namespaced_ingress(namespace="default", body=body)
+
+
+def create_instance(deployment_body, name):
+    rand_suffix = str(uuid.uuid4()).split("-")[0]
+    ingress_path = f"/{name}-{rand_suffix}/websockify"
+    create_deployment(name=name, deployment=deployment_body)
+    time.sleep(2)
+    create_service(name=name, port=80, target_port=80)
+    time.sleep(2)
+    create_ingress(name=name, path=ingress_path, service_name=name, service_port=80)
+    return f"topiaas.ml{ingress_path}"
 
 
 def create_orangeml_instance(name, cpu_limit, memory_limit, password):
@@ -162,7 +116,7 @@ def create_orangeml_instance(name, cpu_limit, memory_limit, password):
     )
     create_deployment(name=name, deployment=deployment_body)
     time.sleep(2)
-    create_service(name=name, app_name=name, port=80, target_port=80)
+    create_service(name=name, port=80, target_port=80)
     time.sleep(2)
     create_ingress(name=name, path=ingress_path, service_name=name, service_port=80)
     return f"topiaas.ml{ingress_path}"
@@ -176,7 +130,7 @@ def create_inkscape_instance(name, cpu_limit, memory_limit, password):
     )
     create_deployment(name=name, deployment=deployment_body)
     time.sleep(2)
-    create_service(name=name, app_name=name, port=80, target_port=80)
+    create_service(name=name, port=80, target_port=80)
     time.sleep(2)
     create_ingress(name=name, path=ingress_path, service_name=name, service_port=80)
     return f"topiaas.ml{ingress_path}"

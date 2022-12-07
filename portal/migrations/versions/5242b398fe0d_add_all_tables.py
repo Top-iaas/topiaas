@@ -45,7 +45,7 @@ def upgrade():
         sa.Column("email", sa.String(length=64), nullable=True),
         sa.Column("password_hash", sa.String(length=128), nullable=True),
         sa.Column("role_id", sa.Integer(), nullable=True),
-        sa.Column("vcpu_limit", sa.Integer(), nullable=True),
+        sa.Column("cpu_limit", sa.Integer(), nullable=True),
         sa.Column("memory_limit", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["role_id"],

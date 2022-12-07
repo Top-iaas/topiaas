@@ -1,7 +1,6 @@
 import os
 import urllib.parse
 
-from raygun4py.middleware import flask as flask_raygun
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -40,7 +39,7 @@ class Config:
     DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
     DATABASE_SERVICE_NAME = os.environ.get("DATABASE_SERVICE_NAME")
     DATABASE_PORT = os.environ.get("DATABASE_PORT", 5432)
-    DEFAULT_DATABASE_URI = f"postgres://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_SERVICE_NAME}:{DATABASE_PORT}/db"
+    DEFAULT_DATABASE_URI = f"postgres://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_SERVICE_NAME}:{DATABASE_PORT}/postgresdb"
 
     # Analytics
     GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID", "")
@@ -75,6 +74,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
+    TEMPLATES_AUTO_RELOAD = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL", Config.DEFAULT_DATABASE_URI
     )
@@ -115,19 +115,6 @@ class ProductionConfig(Config):
         Config.init_app(app)
         assert os.environ.get("SECRET_KEY"), "SECRET_KEY IS NOT SET!"
 
-        flask_raygun.Provider(app, app.config["RAYGUN_APIKEY"]).attach()
-
-
-class HerokuConfig(ProductionConfig):
-    @classmethod
-    def init_app(cls, app):
-        ProductionConfig.init_app(app)
-
-        # Handle proxy server headers
-        from werkzeug.contrib.fixers import ProxyFix
-
-        app.wsgi_app = ProxyFix(app.wsgi_app)
-
 
 class UnixConfig(ProductionConfig):
     @classmethod
@@ -148,6 +135,5 @@ config = {
     "testing": TestingConfig,
     "production": ProductionConfig,
     "default": DevelopmentConfig,
-    "heroku": HerokuConfig,
     "unix": UnixConfig,
 }

@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topiaas-deployment
+  labels:
+    app: topiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: topiaas
+  template:
+    metadata:
+      labels:
+        app: topiaas
+    spec:
+      # must run kubectl label nodes topiaas dev=live
+      # used because of mounted volumes being empty in secondary nodes (minikube bug)
+      nodeSelector:
+        dev: live
+      serviceAccountName: app-manager-service-account
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: topiaas
+          image: topiaas/portal:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+            - containerPort: 5800
+          command:
+            - "python"
+          args:
+            - "-m"
+            - "ptvsd"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "5800"
+            - "--multiprocess"
+            - "-m"
+            - "flask"
+            - "run"
+            - "--host"
+            - "0.0.0.0"
+            # - "--port"
+            # - "5000"
+          env:
+            - name: APP_NAME
+              value: Topiaas
+            - name: FLASK_CONFIG
+              value: development
+            - name: REDISTOGO_URL
+              value: "http://redis-service:6379"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_SERVICE_NAME
+              value: postgres
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /app
+              name: portalsrc
+      volumes:
+        - name: portalsrc
+          hostPath:
+            path: /app
