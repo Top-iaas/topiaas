@@ -10,7 +10,7 @@ While there might be some minor latency compared to running applications on loca
 The entire project is opensource and can be self-hosted anywhere thanks to the cloud-agnostic nature of the architecture.
 ## Infrastructure
 
-![](./assets/Topiaas cloud arch.png)
+![](https://github.com/Top-iaas/topiaas/blob/fb7b14097d7abe277ef3822d3cee659b1f6c372a/assets/Topiaas%20cloud%20arch.png)
 
 ## Architecture
 
